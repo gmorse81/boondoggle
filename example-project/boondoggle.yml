@@ -1,0 +1,56 @@
+pull-secrets-name: dockerregcreds
+helm-repos:
+  - name: stable
+    url: https://kubernetes-charts.storage.googleapis.com
+  - name: aaadigital
+    url: https://webtools.calstate.aaa.com/helmcharts
+    promptbasicauth: true
+umbrella:
+  name: mwg-umbrella-chart
+  path: example-umbrella
+  repository: "@aaadigital"
+  environments:
+    - name: dev
+      files:
+        - "local.yml"
+      values:
+        - "global.localenv=true"
+    - name: test
+      files:
+        - "test.yml"
+    - name: default
+      files:
+        - "prod.yml"
+services:
+  - name: dev-mysql
+    path: source-projects/dev-mysql
+    gitrepo: git@github.com:aaa-ncnu/dev-mysql.git
+    alias: mwg-dev-mysql
+    chart: dev-mysql-chart
+    dep-values-all-states:
+      tags:
+        - "dev"
+    states:
+      - state-name: local
+        helm-values:
+          - "localdev=true"
+        version: x
+        repository: localdev
+      - state-name: default
+        repository: "@aaadigital"
+        version: ~1
+  - name: singularity
+    path: source-projects/singularity
+    gitrepo: git@github.com:aaa-ncnu/singularity.git
+    alias: mwg-singularity
+    chart: singularity-chart
+    states:
+      - state-name: local
+        container-build: "build -t aaadigital/singularity:dev source-projects/singularity/."
+        helm-values:
+          - "localdev=true"
+        version: x
+        repository: localdev
+      - state-name: default
+        repository: "@aaadigital"
+        version: ~1
