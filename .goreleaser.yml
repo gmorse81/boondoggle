@@ -17,5 +17,3 @@ brew:
     email: gmorse81@gmail.com
 
   folder: Homebrew
-
-  skip_upload: true
