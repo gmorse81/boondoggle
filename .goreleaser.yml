@@ -10,7 +10,7 @@ brew:
   name: boondoggle
   github:
     owner: gmorse81
-    name: boondoggle
+    name: homebrew-boondoggle
 
   commit_author:
     name: gmorse81
