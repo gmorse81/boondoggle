@@ -1,0 +1,21 @@
+builds:
+  - binary: boondoggle
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+
+brew:
+  name: boondoggle
+  github:
+    owner: gmorse81
+    name: boondoggle
+
+  commit_author:
+    name: gmorse81
+    email: gmorse81@gmail.com
+
+  folder: Homebrew
+
+  skip_upload: true

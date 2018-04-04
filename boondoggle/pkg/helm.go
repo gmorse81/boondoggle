@@ -7,6 +7,9 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
+
+	"github.com/spf13/viper"
 
 	sshterminal "golang.org/x/crypto/ssh/terminal"
 )
@@ -31,14 +34,58 @@ func (b *Boondoggle) DoUpgrade() error {
 	projectLocation := fmt.Sprintf("--set global.projectLocation=%s", os.Getenv("PWD"))
 	fullcommand = append(fullcommand, strings.Split(projectLocation, " ")...)
 
+	// Add files from the umbrella declartion
 	for _, file := range b.Umbrella.Files {
 		chunk := fmt.Sprintf("-f %s/%s", b.Umbrella.Path, file)
 		fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
 	}
 
+	// Add values from the umbrella declaration
+	for _, value := range b.Umbrella.Values {
+		chunk := fmt.Sprintf("--set %s", value)
+		fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
+	}
+
+	// Add values from each service, append the service's chart name(or alias if supplied)
+	for _, service := range b.Services {
+		for _, servicevalue := range service.HelmValues {
+			chunk := fmt.Sprintf("--set %s.%s", service.GetHelmDepName(), servicevalue)
+			fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
+		}
+	}
+
+	// For services running in local dev, add the cachebuster
+	for _, service := range b.Services {
+		if service.Repository == "localdev" && service.ContainerBuild != "" {
+			now := time.Now()
+			chunk := fmt.Sprintf("--set %s.boondoggleCacheBust=%d", service.GetHelmDepName(), now.Unix())
+			fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
+		}
+	}
+
+	// Add the namespace if there is one.
+	if namespace := viper.GetString("namespace"); namespace != "" {
+		chunk := fmt.Sprintf("--namespace %s", namespace)
+		fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
+	}
+
+	// Add the release name
+	if release := viper.GetString("release"); release != "" {
+		fullcommand = append(fullcommand, release)
+	}
+
 	fullcommand = append(fullcommand, fmt.Sprintf("./%s", b.Umbrella.Path))
 
 	fmt.Printf("helm %s", strings.Trim(fmt.Sprint(fullcommand), "[]"))
+
+	// Run the command
+	cmd := exec.Command("helm", fullcommand...)
+	out, err := cmd.CombinedOutput()
+	fmt.Println(string(out))
+	if err != nil {
+		return fmt.Errorf("Helm upgrade command reported error: %s", err)
+	}
+
 	return nil
 }
 

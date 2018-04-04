@@ -4,11 +4,16 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/spf13/viper"
+
 	"gopkg.in/yaml.v2"
 
 	"github.com/gmorse81/mwg-env-switcher/boondoggle/pkg"
 	"github.com/spf13/cobra"
 )
+
+var namespace string
+var release string
 
 // upCmd represents the up command
 var upCmd = &cobra.Command{
@@ -27,7 +32,7 @@ var upCmd = &cobra.Command{
 
 		// Write the new requirements.yml
 		out, err := yaml.Marshal(r)
-		path := fmt.Sprintf("%s/requirements.yaml", b.Umbrella.Path )
+		path := fmt.Sprintf("%s/requirements.yaml", b.Umbrella.Path)
 		ioutil.WriteFile(path, out, 0644)
 		if err != nil {
 			return err
@@ -35,6 +40,12 @@ var upCmd = &cobra.Command{
 
 		// Add any helm repos that are not already added.
 		err = b.AddHelmRepos()
+		if err != nil {
+			return err
+		}
+
+		// Add the imagePullSecrets using kubectl
+		err = b.AddImagePullSecret()
 		if err != nil {
 			return err
 		}
@@ -47,12 +58,6 @@ var upCmd = &cobra.Command{
 
 		// Build the containers that need to be built.
 		err = b.DoBuild()
-		if err != nil {
-			return err
-		}
-
-		// Add the imagePullSecrets using kubectl
-		err = b.AddImagePullSecret()
 		if err != nil {
 			return err
 		}
@@ -73,5 +78,12 @@ var upCmd = &cobra.Command{
 }
 
 func init() {
+	upCmd.Flags().StringVar(&release, "release", "", "The helm release name")
+	upCmd.MarkFlagRequired("release")
+	viper.BindPFlag("release", upCmd.Flags().Lookup("release"))
+
+	upCmd.Flags().StringVar(&namespace, "namespace", "", "The kubernetes namespace of this release")
+	viper.BindPFlag("namespace", upCmd.Flags().Lookup("namespace"))
+
 	rootCmd.AddCommand(upCmd)
 }
