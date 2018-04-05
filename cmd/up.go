@@ -18,7 +18,7 @@ var release string
 // upCmd represents the up command
 var upCmd = &cobra.Command{
 	Use:   "up",
-	Short: "Do all the things.",
+	Short: "Runs 'helm upgrade --install' with config based on flags and the contents of boondoggle.yml",
 	Long: `boondoggle up with no extra flags will configure your defaults and deploy using helm. 
 	Flags can be used to change configuration based on your needs.`,
 	SilenceUsage: true,

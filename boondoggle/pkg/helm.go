@@ -16,15 +16,6 @@ import (
 
 //This file contains the helm commands run by boondoggle using values from Boondoggle
 
-// TODOs
-//run the helm upgrade command
-//add extra --set for build cachebuster when projects have localdev
-//use the alias for --set when there is one, else use reponame
-//add the local-files-path value
-//run dep up
-
-// helm upgrade mwg --install ${PWD}/mwg-umbrella-chart -f ${PWD}/mwg-umbrella-chart/local.yml --set global.projectLocation=${PWD}
-
 // DoUpgrade builds and runs the helm upgrade --install command.
 func (b *Boondoggle) DoUpgrade() error {
 	fullcommand := []string{"upgrade", "-i"}
