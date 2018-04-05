@@ -8,7 +8,7 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"github.com/gmorse81/mwg-env-switcher/boondoggle/pkg"
+	"github.com/gmorse81/boondoggle/boondoggle/pkg"
 	"github.com/spf13/cobra"
 )
 
