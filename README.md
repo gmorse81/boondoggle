@@ -61,7 +61,7 @@ services:
     path: source-projects/my-dependency
     # If specified, and the "state" selected below has its repository set as "localdev", boondoggle will clone this project to the path above. 
     # It will only do this if the directory doesn't already exist.
-    gitrepo: git@github.com:aaa-ncnu/singularity.git
+    gitrepo: git@github.com:my-account/my-dependency.git
     # The alias of the dependency as to be used in requirements.yaml
     alias: awesome-chart
     # The name of the chart as specified in this project's chart.yml. note boodoggle expects this chart to live at PATH/CHART
@@ -71,7 +71,7 @@ services:
       # This state is called "local"
       - state-name: local
         # If specified, and the repository name is "localdev", this command will be run to build the dockerfile in this project. 
-        container-build: "build -t aaadigital/singularity:dev source-projects/singularity/."
+        container-build: "build -t myaccount/myimage:dev source-projects/my-dependency/."
         # Values passe to the helm install command like this: --set awesome-chart.localdev=true note that the alias or chart value is prepended to the value automatically by boondoggle
         helm-values:
           - "localdev=true"
@@ -81,7 +81,7 @@ services:
         repository: localdev
         # the default state. using the word "default" here indicated to boondoggle that if no other flags are supplied to the command, this is the state you want to use.
       - state-name: default
-        repository: "@aaadigital"
+        repository: "@myprivaterepo"
         version: ~1
   # Another service. Same as above.
   - name: dev-mysql
@@ -99,7 +99,7 @@ services:
         version: x
         repository: localdev
       - state-name: default
-        repository: "@aaadigital"
+        repository: "@myprivaterepo"
         version: ~1
 ```
 
