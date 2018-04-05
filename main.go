@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/gmorse81/mwg-env-switcher/cmd"
+import "github.com/gmorse81/boondoggle/cmd"
 
 func main() {
 	cmd.Execute()
