@@ -124,4 +124,4 @@ here's the output from boondoggle up --help
         --config string                    config file (./boondoggle.yml)
     -e, --environment string               Selects the umbrella environment. Defaults to the environment with name: default in the boondoggle.yml file. (default "default")
     -s, --service-state stringSlice        Sets a services state eg. my-service=local. Defaults to the 'default' state.
-    -o, --state-v-override stringSlice   Override a services value for the state selected. eg. my-service=1.0.0
+    -o, --state-v-override stringSlice     Override a services value for the state selected. eg. my-service=1.0.0
