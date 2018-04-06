@@ -1,6 +1,8 @@
 package boondoggle
 
 import (
+	"strings"
+	"github.com/spf13/viper"
 	"os"
 	"fmt"
 )
@@ -34,9 +36,11 @@ func BuildRequirements(b Boondoggle) Requirements {
 			repoLocation = service.Repository
 		}
 
+		version := getVersionFlag(service)
+
 		var dependency = Dependency{
 			Name:         service.Chart,
-			Version:      service.Version,
+			Version:      version,
 			Repository:   repoLocation,
 			Condition:    service.Condition,
 			Tags:         service.Tags,
@@ -48,6 +52,20 @@ func BuildRequirements(b Boondoggle) Requirements {
 		r.Dependencies = append(r.Dependencies, dependency)
 	}
 	return r
+}
+
+func getVersionFlag(service Service) string {
+	// for each of the --state-v-override flags...
+	for _, override := range viper.GetStringSlice("state-v-override") {
+		//Split into slice on the "="
+		splitvalue := strings.Split(override, "=")
+		// if the left side of the value equals the service name, return the version.
+		if splitvalue[0] == service.Name {
+			return splitvalue[1]
+		}
+	}
+	// if no match found, return the original version.
+	return service.Version
 }
 
 func getLocalRepoLocation(s Service, l string) string {

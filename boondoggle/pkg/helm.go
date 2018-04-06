@@ -49,7 +49,7 @@ func (b *Boondoggle) DoUpgrade() error {
 	for _, service := range b.Services {
 		if service.Repository == "localdev" && service.ContainerBuild != "" {
 			now := time.Now()
-			chunk := fmt.Sprintf("--set %s.boondoggleCacheBust=%d", service.GetHelmDepName(), now.Unix())
+			chunk := fmt.Sprintf("--set %s.boondoggleCacheBust='%d'", service.GetHelmDepName(), now.Unix())
 			fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
 		}
 	}
