@@ -60,7 +60,7 @@ func getVersionFlag(service Service) string {
 		//Split into slice on the "="
 		splitvalue := strings.Split(override, "=")
 		// if the left side of the value equals the service name, return the version.
-		if splitvalue[0] == service.Name {
+		if splitvalue[0] == service.Name && len(splitvalue) == 2 {
 			return splitvalue[1]
 		}
 	}
