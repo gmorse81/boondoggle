@@ -13,7 +13,7 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "boondoggle",
-	Short: "A helm umbrella chart configurator for full stack dev.",
+	Short: "Boondoggle is a helm umbrella chart preprocessor, a dependency state management tool as well as a local development tool.",
 }
 
 var serviceState []string
@@ -38,8 +38,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&umbrellaEnv, "environment", "e", "default", "Selects the umbrella environment. Defaults to the environment with name: default in the boondoggle.yml file.")
 	viper.BindPFlag("environment", rootCmd.PersistentFlags().Lookup("environment"))
 
-	rootCmd.PersistentFlags().StringSliceVarP(&stateValueOverride, "state-val-override", "o", []string{""}, "Override a services value for the state selected. eg. my-service.version=1.0.0")
-	viper.BindPFlag("state-val-override", rootCmd.PersistentFlags().Lookup("state-val-override"))
+	rootCmd.PersistentFlags().StringSliceVarP(&stateValueOverride, "state-v-override", "o", []string{""}, "Override a services's version for the state specified. eg. my-service=1.0.0")
+	viper.BindPFlag("state-v-override", rootCmd.PersistentFlags().Lookup("state-v-override"))
 }
 
 // initConfig reads in config file and ENV variables if set.
