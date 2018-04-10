@@ -1,6 +1,6 @@
-// Watch projects that have repo set to localdev
 package boondoggle
 
+// WatchProjects doesnt do anything yet!
 func WatchProjects() {
 
 }

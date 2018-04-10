@@ -2,6 +2,7 @@ package boondoggle
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -143,7 +144,7 @@ func (b *Boondoggle) configureUmbrella(r RawBoondoggle) {
 		b.Umbrella.Name = r.Umbrella.Name
 		b.Umbrella.Path = r.Umbrella.Path
 		b.Umbrella.Repository = r.Umbrella.Repository
-		b.Umbrella.Values = r.Umbrella.Environments[umbrellaEnvKey].Values
+		b.Umbrella.Values = escapableEnvVarReplaceSlice(r.Umbrella.Environments[umbrellaEnvKey].Values)
 		b.Umbrella.Files = r.Umbrella.Environments[umbrellaEnvKey].Files
 	}
 }
@@ -184,9 +185,9 @@ func (b *Boondoggle) configureServices(r RawBoondoggle) {
 				Gitrepo:        rawService.Gitrepo,
 				Alias:          rawService.Alias,
 				Chart:          rawService.Chart,
-				ContainerBuild: rawService.States[chosenStateKey].ContainerBuild,
+				ContainerBuild: escapableEnvVarReplace(rawService.States[chosenStateKey].ContainerBuild),
 				Repository:     rawService.States[chosenStateKey].Repository,
-				HelmValues:     rawService.States[chosenStateKey].HelmValues,
+				HelmValues:     escapableEnvVarReplaceSlice(rawService.States[chosenStateKey].HelmValues),
 				Version:        rawService.States[chosenStateKey].Version,
 				Condition:      rawService.States[chosenStateKey].Condition,
 				Tags:           rawService.States[chosenStateKey].Tags,
@@ -241,4 +242,22 @@ func getRawStateKeyByName(desiredServiceName string, desiredServiceState string,
 		}
 	}
 	return 999, fmt.Errorf("A service or state requested was not found for %s %s", desiredServiceName, desiredServiceState)
+}
+
+//replace env vars in a string slice.
+func escapableEnvVarReplaceSlice(s []string) []string {
+	for key, val := range s {
+		s[key] = escapableEnvVarReplace(val)
+	}
+	return s
+}
+
+//escapableEnvVarReplace wraps os.Getenv to allow for escaping with $$.
+func escapableEnvVarReplace(s string) string {
+	return os.Expand(s, func(s string) string {
+		if s == "$" {
+			return "$"
+		}
+		return os.Getenv(s)
+	})
 }
