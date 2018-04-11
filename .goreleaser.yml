@@ -11,8 +11,15 @@ brew:
   github:
     owner: gmorse81
     name: homebrew-boondoggle
-
   commit_author:
     name: gmorse81
     email: gmorse81@gmail.com
 
+dockers:
+  - goos: linux
+    goarch: amd64
+    binary: boondoggle
+    image: gmorse81/boondoggle
+    tag_templates:
+      - latest
+      - "{{ .Version }}"
