@@ -19,6 +19,7 @@ var rootCmd = &cobra.Command{
 var serviceState []string
 var umbrellaEnv string
 var stateValueOverride []string
+var dryRun bool
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -40,6 +41,9 @@ func init() {
 
 	rootCmd.PersistentFlags().StringSliceVarP(&stateValueOverride, "state-v-override", "o", []string{""}, "Override a services's version for the state specified. eg. my-service=1.0.0")
 	viper.BindPFlag("state-v-override", rootCmd.PersistentFlags().Lookup("state-v-override"))
+
+	rootCmd.PersistentFlags().BoolVarP(&dryRun, "dry-run", "d", false, "Dry run will do all steps except for the helm deploy. The helm command that would have been run will be printed.")
+	viper.BindPFlag("dry-run", rootCmd.PersistentFlags().Lookup("dry-run"))
 }
 
 // initConfig reads in config file and ENV variables if set.
