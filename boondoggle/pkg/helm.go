@@ -67,14 +67,16 @@ func (b *Boondoggle) DoUpgrade() error {
 
 	fullcommand = append(fullcommand, fmt.Sprintf("./%s", b.Umbrella.Path))
 
-	fmt.Printf("helm %s", strings.Trim(fmt.Sprint(fullcommand), "[]"))
+	fmt.Printf("helm %s\n", strings.Trim(fmt.Sprint(fullcommand), "[]"))
 
 	// Run the command
-	cmd := exec.Command("helm", fullcommand...)
-	out, err := cmd.CombinedOutput()
-	fmt.Println(string(out))
-	if err != nil {
-		return fmt.Errorf("Helm upgrade command reported error: %s", err)
+	if dryRun := viper.GetBool("dry-run"); dryRun == false {
+		cmd := exec.Command("helm", fullcommand...)
+		out, err := cmd.CombinedOutput()
+		fmt.Println(string(out))
+		if err != nil {
+			return fmt.Errorf("Helm upgrade command reported error: %s", err)
+		}
 	}
 
 	return nil
