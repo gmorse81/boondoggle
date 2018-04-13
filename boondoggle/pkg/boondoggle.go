@@ -15,6 +15,8 @@ type RawBoondoggle struct {
 		Name            string `mapstructure:"name"`
 		URL             string `mapstructure:"url"`
 		Promptbasicauth bool   `mapstructure:"promptbasicauth,omitempty"`
+		Username        string `mapstructure:"username,omitempty"`
+		Password        string `mapstructure:"password,omitempty"`
 	} `mapstructure:"helm-repos"`
 	Umbrella struct {
 		Name         string `mapstructure:"name"`
@@ -65,6 +67,8 @@ type HelmRepo struct {
 	Name            string
 	URL             string
 	Promptbasicauth bool
+	Username        string
+	Password        string
 }
 
 // Umbrella is the definition of a Helm Umbrella chart. Part of Boondoggle struct.
@@ -119,6 +123,8 @@ func (b *Boondoggle) configureTopLevel(r RawBoondoggle) {
 			Name:            helmrepo.Name,
 			URL:             helmrepo.URL,
 			Promptbasicauth: helmrepo.Promptbasicauth,
+			Username:        escapableEnvVarReplace(helmrepo.Username),
+			Password:        escapableEnvVarReplace(helmrepo.Password),
 		}
 		b.HelmRepos = append(b.HelmRepos, repoDetails)
 	}

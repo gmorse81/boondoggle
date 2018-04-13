@@ -93,9 +93,13 @@ func (b *Boondoggle) DepUp() error {
 	return nil
 }
 
-//AddHelmRepos uses `helm repo add` to setup the repos in boondoggle config.
-//if promtbasicauth is true, it will prompt the user for the helm repo username and password
-//it will not do anything if the repo is already added.
+/*
+AddHelmRepos uses `helm repo add` to setup the repos listed in boondoggle config.
+If promtbasicauth is true, it will prompt the user for the helm repo username and password.
+If "username" and "password" are provided, it will use these as the basic auth username and password. environment var replacement is supported for these.
+If the result for the environment variable lookup is empty, it will fall back to prompting for username and password.
+It will not do anything if the repo is already added.
+*/
 func (b *Boondoggle) AddHelmRepos() error {
 	cmd := exec.Command("helm", "repo", "list")
 	out, err := cmd.CombinedOutput()
@@ -107,23 +111,39 @@ func (b *Boondoggle) AddHelmRepos() error {
 		// If the output of "helm repo list" does not contain the repo name(by basic string search), add it.
 		if strings.Contains(string(out), repo.Name) == false {
 			if repo.Promptbasicauth == true { //if the repo requires username and password, prompt for that.
-				fmt.Printf("Enter the username for repo %s: \n", repo.Name)
+
+				// get the username either from user input or from boondoggle.yml
 				var username string
-				_, err := fmt.Scanln(&username)
-				if err != nil {
-					return fmt.Errorf("error with helm add repo: %s", err)
+				if repo.Username == "" {
+					fmt.Printf("Enter the username for repo %s: \n", repo.Name)
+					_, err := fmt.Scanln(&username)
+					if err != nil {
+						return fmt.Errorf("error with helm add repo: %s", err)
+					}
+				} else {
+					username = repo.Username
 				}
-				fmt.Printf("Enter the password for %s: \n", username)
-				password, err := sshterminal.ReadPassword(0)
-				if err != nil {
-					return fmt.Errorf("error with helm add repo: %s", err)
+
+				// get the password either from user input or from boondoggle.yml
+				var password string
+				if repo.Password == "" {
+					fmt.Printf("Enter the password for %s: \n", username)
+					bytePassword, err := sshterminal.ReadPassword(0)
+					if err != nil {
+						return fmt.Errorf("error with helm add repo: %s", err)
+					}
+					password = string(bytePassword)
+				} else {
+					password = repo.Password
 				}
+
 				u, err := url.Parse(repo.URL)
 				if err != nil {
 					return fmt.Errorf("error with helm add repo: %s", err)
 				}
+
 				//Add the basic auth username and password to the URL.
-				u.User = url.UserPassword(username, string(password))
+				u.User = url.UserPassword(username, password)
 				repoadd(repo.Name, u)
 			} else { // else, add without the prompt for username and password.
 				u, err := url.Parse(repo.URL)

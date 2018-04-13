@@ -33,6 +33,11 @@ helm-repos:
   - name: myprivaterepo
     url: https://privaterepo.example.com/repo
     promptbasicauth: true
+    # You can provide the username and password in boondoggle.yml. Both support environment variable replacement. 
+    # If the replaced value is an empty string, it will fall back to prompting for the values.
+    # This is useful if you are running boondoggle in an automated fashion.
+    username: myrepousername
+    password: ${HELM_PASS}
 # Specify the details and path of your umbrella chart relative to the boondoggle.yml file.
 umbrella:
   # name of the chart as specified in chart.yaml
