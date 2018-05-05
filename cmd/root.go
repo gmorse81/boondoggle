@@ -20,6 +20,8 @@ var serviceState []string
 var umbrellaEnv string
 var stateValueOverride []string
 var dryRun bool
+var setStateAll string
+var skipDocker bool
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -44,6 +46,12 @@ func init() {
 
 	rootCmd.PersistentFlags().BoolVarP(&dryRun, "dry-run", "d", false, "Dry run will do all steps except for the helm deploy. The helm command that would have been run will be printed.")
 	viper.BindPFlag("dry-run", rootCmd.PersistentFlags().Lookup("dry-run"))
+
+	rootCmd.PersistentFlags().StringVarP(&setStateAll, "set-state-all", "a", "", "Sets all services to the same state.")
+	viper.BindPFlag("set-state-all", rootCmd.PersistentFlags().Lookup("set-state-all"))
+
+	rootCmd.PersistentFlags().BoolVarP(&skipDocker, "skip-docker", "k", false, "Skips the docker build step.")
+	viper.BindPFlag("skip-docker", rootCmd.PersistentFlags().Lookup("skip-docker"))
 }
 
 // initConfig reads in config file and ENV variables if set.

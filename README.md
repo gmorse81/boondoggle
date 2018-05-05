@@ -132,8 +132,10 @@ here's the output from boondoggle up --help
         --release string     The helm release name
 
     Global Flags:
-        --config string                    config file (./boondoggle.yml)
-    -d, --dry-run                          Dry run will do all steps except for the helm deploy. The helm command that would have been run will be printed.
-    -e, --environment string               Selects the umbrella environment. Defaults to the environment with name: default in the boondoggle.yml file. (default "default")
-    -s, --service-state stringSlice        Sets a services state eg. my-service=local. Defaults to the 'default' state.
-    -o, --state-v-override stringSlice     Override a services value for the state selected. eg. my-service=1.0.0
+        --config string                  config file (./boondoggle.yml)
+    -d, --dry-run                        Dry run will do all steps except for the helm deploy. The helm command that would have been run will be printed.
+    -e, --environment string             Selects the umbrella environment. Defaults to the environment with name: default in the boondoggle.yml file. (default "default")
+    -s, --service-state stringSlice      Sets a services state eg. my-service=local. Defaults to the 'default' state.
+    -a, --set-state-all string           Sets all services to the same state.
+    -k, --skip-docker                    Skips the docker build step.
+    -o, --state-v-override stringSlice   Override a services's version for the state specified. eg. my-service=1.0.0

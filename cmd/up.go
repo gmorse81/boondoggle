@@ -57,9 +57,11 @@ var upCmd = &cobra.Command{
 		}
 
 		// Build the containers that need to be built.
-		err = b.DoBuild()
-		if err != nil {
-			return err
+		if skipDocker != true {
+			err = b.DoBuild()
+			if err != nil {
+				return err
+			}
 		}
 
 		// Run helm dep up

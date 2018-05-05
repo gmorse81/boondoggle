@@ -172,12 +172,19 @@ func (b *Boondoggle) configureServices(r RawBoondoggle) {
 	for _, rawService := range r.Services {
 		var chosenStateKey int
 		var err error
-		if serviceStates[rawService.Name] != "" {
-			// if we have a override in the serviceStates, get the state values based on that name.
-			chosenStateKey, err = getRawStateKeyByName(rawService.Name, serviceStates[rawService.Name], r)
+
+		// If the set-state-all flag was not set, set service states with default logic.
+		overrideServiceState := viper.GetString("set-state-all")
+		if overrideServiceState == "" {
+			if serviceStates[rawService.Name] != "" {
+				// if we have a override in the serviceStates, get the state values based on that name.
+				chosenStateKey, err = getRawStateKeyByName(rawService.Name, serviceStates[rawService.Name], r)
+			} else {
+				// if not, find the default
+				chosenStateKey, err = getRawStateKeyByName(rawService.Name, "default", r)
+			}
 		} else {
-			// if not, find the default
-			chosenStateKey, err = getRawStateKeyByName(rawService.Name, "default", r)
+			chosenStateKey, err = getRawStateKeyByName(rawService.Name, overrideServiceState, r)
 		}
 
 		if err != nil {

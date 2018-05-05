@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/spf13/viper"
 	sshterminal "golang.org/x/crypto/ssh/terminal"
 )
 
@@ -14,6 +15,14 @@ func (b *Boondoggle) AddImagePullSecret() error {
 		// Determine if it's already set up.
 		in := fmt.Sprintf("get secrets %s", b.PullSecretsName)
 		inslice := strings.Split(in, " ")
+
+		// If a namesapce was provided in the "up" command, include the namespace in the check.
+		// Add the namespace if there is one.
+		if namespace := viper.GetString("namespace"); namespace != "" {
+			chunk := fmt.Sprintf("--namespace %s", namespace)
+			inslice = append(inslice, strings.Split(chunk, " ")...)
+		}
+
 		cmd := exec.Command("kubectl", inslice...)
 		out, err := cmd.CombinedOutput()
 		if err != nil && strings.Contains(string(out), "NotFound") {
@@ -38,6 +47,14 @@ func (b *Boondoggle) AddImagePullSecret() error {
 			}
 			in := fmt.Sprintf("create secret docker-registry %s --docker-username=%s --docker-password=%s --docker-email=%s", b.PullSecretsName, username, password, email)
 			inslice := strings.Split(in, " ")
+
+			// If a namesapce was provided in the "up" command, include the namespace when creating the secret.
+			// Add the namespace if there is one.
+			if namespace := viper.GetString("namespace"); namespace != "" {
+				chunk := fmt.Sprintf("--namespace %s", namespace)
+				inslice = append(inslice, strings.Split(chunk, " ")...)
+			}
+
 			cmd := exec.Command("kubectl", inslice...)
 			out, err := cmd.CombinedOutput()
 			fmt.Println(string(out))
