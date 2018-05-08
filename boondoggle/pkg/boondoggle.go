@@ -10,7 +10,10 @@ import (
 
 // RawBoondoggle is the struct representation of the boondoggle.yml config file.
 type RawBoondoggle struct {
-	PullSecretsName string `mapstructure:"pull-secrets-name"`
+	PullSecretsName string `mapstructure:"pull-secrets-name,omitempty"`
+	DockerUsername  string `mapstructure:"docker_username,omitempty"`
+	DockerPassword  string `mapstructure:"docker_password,omitempty"`
+	DockerEmail     string `mapstructure:"docker_email,omitempty"`
 	HelmRepos       []struct {
 		Name            string `mapstructure:"name"`
 		URL             string `mapstructure:"url"`
@@ -57,6 +60,9 @@ type RawBoondoggle struct {
 // Boondoggle is the processed version of RawBoondoggle. It represents the settings of only the chosen options.
 type Boondoggle struct {
 	PullSecretsName string
+	DockerUsername  string
+	DockerPassword  string
+	DockerEmail     string
 	HelmRepos       []HelmRepo
 	Umbrella        Umbrella
 	Services        []Service
@@ -118,6 +124,9 @@ func (s Service) GetHelmDepName() string {
 
 func (b *Boondoggle) configureTopLevel(r RawBoondoggle) {
 	b.PullSecretsName = r.PullSecretsName
+	b.DockerEmail = escapableEnvVarReplace(r.DockerEmail)
+	b.DockerPassword = escapableEnvVarReplace(r.DockerPassword)
+	b.DockerUsername = escapableEnvVarReplace(r.DockerUsername)
 	for _, helmrepo := range r.HelmRepos {
 		var repoDetails = HelmRepo{
 			Name:            helmrepo.Name,
@@ -172,12 +181,19 @@ func (b *Boondoggle) configureServices(r RawBoondoggle) {
 	for _, rawService := range r.Services {
 		var chosenStateKey int
 		var err error
-		if serviceStates[rawService.Name] != "" {
-			// if we have a override in the serviceStates, get the state values based on that name.
-			chosenStateKey, err = getRawStateKeyByName(rawService.Name, serviceStates[rawService.Name], r)
+
+		// If the set-state-all flag was not set, set service states with default logic.
+		overrideServiceState := viper.GetString("set-state-all")
+		if overrideServiceState == "" {
+			if serviceStates[rawService.Name] != "" {
+				// if we have a override in the serviceStates, get the state values based on that name.
+				chosenStateKey, err = getRawStateKeyByName(rawService.Name, serviceStates[rawService.Name], r)
+			} else {
+				// if not, find the default
+				chosenStateKey, err = getRawStateKeyByName(rawService.Name, "default", r)
+			}
 		} else {
-			// if not, find the default
-			chosenStateKey, err = getRawStateKeyByName(rawService.Name, "default", r)
+			chosenStateKey, err = getRawStateKeyByName(rawService.Name, overrideServiceState, r)
 		}
 
 		if err != nil {
