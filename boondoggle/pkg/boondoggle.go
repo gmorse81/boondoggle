@@ -10,7 +10,10 @@ import (
 
 // RawBoondoggle is the struct representation of the boondoggle.yml config file.
 type RawBoondoggle struct {
-	PullSecretsName string `mapstructure:"pull-secrets-name"`
+	PullSecretsName string `mapstructure:"pull-secrets-name,omitempty"`
+	DockerUsername  string `mapstructure:"docker_username,omitempty"`
+	DockerPassword  string `mapstructure:"docker_password,omitempty"`
+	DockerEmail     string `mapstructure:"docker_email,omitempty"`
 	HelmRepos       []struct {
 		Name            string `mapstructure:"name"`
 		URL             string `mapstructure:"url"`
@@ -57,6 +60,9 @@ type RawBoondoggle struct {
 // Boondoggle is the processed version of RawBoondoggle. It represents the settings of only the chosen options.
 type Boondoggle struct {
 	PullSecretsName string
+	DockerUsername  string
+	DockerPassword  string
+	DockerEmail     string
 	HelmRepos       []HelmRepo
 	Umbrella        Umbrella
 	Services        []Service
@@ -118,6 +124,9 @@ func (s Service) GetHelmDepName() string {
 
 func (b *Boondoggle) configureTopLevel(r RawBoondoggle) {
 	b.PullSecretsName = r.PullSecretsName
+	b.DockerEmail = escapableEnvVarReplace(r.DockerEmail)
+	b.DockerPassword = escapableEnvVarReplace(r.DockerPassword)
+	b.DockerUsername = escapableEnvVarReplace(r.DockerUsername)
 	for _, helmrepo := range r.HelmRepos {
 		var repoDetails = HelmRepo{
 			Name:            helmrepo.Name,

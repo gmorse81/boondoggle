@@ -27,24 +27,41 @@ func (b *Boondoggle) AddImagePullSecret() error {
 		out, err := cmd.CombinedOutput()
 		if err != nil && strings.Contains(string(out), "NotFound") {
 			// if there was an error and the output of the command contains "NotFound", setup the credentials
-			fmt.Println("You need to set up docker hub integration with kubernetes.")
-			fmt.Println("Please enter your docker hub EMAIL ADDRESS:")
+
 			var email string
-			_, err := fmt.Scanln(&email)
-			if err != nil {
-				return fmt.Errorf("error with kubectl create secret: %s", err)
+			if b.DockerEmail == "" {
+				fmt.Println("You need to set up docker hub integration with kubernetes.")
+				fmt.Println("Please enter your docker hub EMAIL ADDRESS:")
+				_, err := fmt.Scanln(&email)
+				if err != nil {
+					return fmt.Errorf("error with kubectl create secret: %s", err)
+				}
+			} else {
+				email = b.DockerEmail
 			}
-			fmt.Println("Please enter your docker hub USERNAME:")
+
 			var username string
-			_, err = fmt.Scanln(&username)
-			if err != nil {
-				return fmt.Errorf("error with kubectl create secret: %s", err)
+			if b.DockerUsername == "" {
+				fmt.Println("Please enter your docker hub USERNAME:")
+				_, err = fmt.Scanln(&username)
+				if err != nil {
+					return fmt.Errorf("error with kubectl create secret: %s", err)
+				}
+			} else {
+				username = b.DockerUsername
 			}
-			fmt.Println("Please enter your docker hub PASSWORD:")
-			password, err := sshterminal.ReadPassword(0)
-			if err != nil {
-				return fmt.Errorf("error with kubectl create secret: %s", err)
+
+			var password []byte
+			if b.DockerPassword == "" {
+				fmt.Println("Please enter your docker hub PASSWORD:")
+				password, err = sshterminal.ReadPassword(0)
+				if err != nil {
+					return fmt.Errorf("error with kubectl create secret: %s", err)
+				}
+			} else {
+				password = []byte(b.DockerPassword)
 			}
+
 			in := fmt.Sprintf("create secret docker-registry %s --docker-username=%s --docker-password=%s --docker-email=%s", b.PullSecretsName, username, password, email)
 			inslice := strings.Split(in, " ")
 
