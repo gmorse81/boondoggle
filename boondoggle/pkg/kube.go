@@ -12,6 +12,14 @@ import (
 //AddImagePullSecret ensures the kubernetes imagePullSecret is set with kubectl.
 func (b *Boondoggle) AddImagePullSecret() error {
 	if b.PullSecretsName != "" { // if boondoggle config specifies a pullsecretsname
+
+		// Create the namespace in the cluster if there is one provided
+		if namespace := viper.GetString("namespace"); namespace != "" {
+			namespaceCommand := exec.Command("kubectl", "create", "namespace", namespace)
+			out, _ := namespaceCommand.CombinedOutput()
+			fmt.Println(out)
+		}
+
 		// Determine if it's already set up.
 		in := fmt.Sprintf("get secrets %s", b.PullSecretsName)
 		inslice := strings.Split(in, " ")
