@@ -17,7 +17,7 @@ func (b *Boondoggle) AddImagePullSecret() error {
 		if namespace := viper.GetString("namespace"); namespace != "" {
 			namespaceCommand := exec.Command("kubectl", "create", "namespace", namespace)
 			out, _ := namespaceCommand.CombinedOutput()
-			fmt.Println(out)
+			fmt.Println(string(out))
 		}
 
 		// Determine if it's already set up.
