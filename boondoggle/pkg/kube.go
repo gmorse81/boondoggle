@@ -5,16 +5,15 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/spf13/viper"
 	sshterminal "golang.org/x/crypto/ssh/terminal"
 )
 
 //AddImagePullSecret ensures the kubernetes imagePullSecret is set with kubectl.
-func (b *Boondoggle) AddImagePullSecret() error {
+func (b *Boondoggle) AddImagePullSecret(namespace string) error {
 	if b.PullSecretsName != "" { // if boondoggle config specifies a pullsecretsname
 
 		// Create the namespace in the cluster if there is one provided
-		if namespace := viper.GetString("namespace"); namespace != "" {
+		if namespace != "" {
 			namespaceCommand := exec.Command("kubectl", "create", "namespace", namespace)
 			out, _ := namespaceCommand.CombinedOutput()
 			fmt.Println(string(out))
@@ -26,7 +25,7 @@ func (b *Boondoggle) AddImagePullSecret() error {
 
 		// If a namesapce was provided in the "up" command, include the namespace in the check.
 		// Add the namespace if there is one.
-		if namespace := viper.GetString("namespace"); namespace != "" {
+		if namespace != "" {
 			chunk := fmt.Sprintf("--namespace %s", namespace)
 			inslice = append(inslice, strings.Split(chunk, " ")...)
 		}
@@ -75,7 +74,7 @@ func (b *Boondoggle) AddImagePullSecret() error {
 
 			// If a namesapce was provided in the "up" command, include the namespace when creating the secret.
 			// Add the namespace if there is one.
-			if namespace := viper.GetString("namespace"); namespace != "" {
+			if namespace != "" {
 				chunk := fmt.Sprintf("--namespace %s", namespace)
 				inslice = append(inslice, strings.Split(chunk, " ")...)
 			}

@@ -1,10 +1,9 @@
 package boondoggle
 
 import (
-	"strings"
-	"github.com/spf13/viper"
-	"os"
 	"fmt"
+	"os"
+	"strings"
 )
 
 // Requirements represents the yaml file requirements.yaml as used in a Helm chart.
@@ -25,18 +24,18 @@ type Dependency struct {
 }
 
 //BuildRequirements converts a Boondoggle into a Helm Requirements struct.
-func BuildRequirements(b Boondoggle) Requirements {
+func BuildRequirements(b Boondoggle, svo []string) Requirements {
 	var r Requirements
 	var repoLocation string
 	for _, service := range b.Services {
 
 		if service.Repository == "localdev" {
-			repoLocation = fmt.Sprintf("file://%s/%s/%s", os.Getenv("PWD"), service.Path ,service.Chart)
+			repoLocation = fmt.Sprintf("file://%s/%s/%s", os.Getenv("PWD"), service.Path, service.Chart)
 		} else {
 			repoLocation = service.Repository
 		}
 
-		version := getVersionFlag(service)
+		version := getVersionFlag(service, svo)
 
 		var dependency = Dependency{
 			Name:         service.Chart,
@@ -54,9 +53,9 @@ func BuildRequirements(b Boondoggle) Requirements {
 	return r
 }
 
-func getVersionFlag(service Service) string {
+func getVersionFlag(service Service, svo []string) string {
 	// for each of the --state-v-override flags...
-	for _, override := range viper.GetStringSlice("state-v-override") {
+	for _, override := range svo {
 		//Split into slice on the "="
 		splitvalue := strings.Split(override, "=")
 		// if the left side of the value equals the service name, return the version.

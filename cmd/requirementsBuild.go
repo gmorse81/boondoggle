@@ -6,6 +6,7 @@ import (
 
 	"github.com/gmorse81/boondoggle/boondoggle/pkg"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 )
 
@@ -13,16 +14,18 @@ import (
 var requirementsBuildCmd = &cobra.Command{
 	Use:   "requirements-build",
 	Short: "Only build the requirements.yaml file and run helm dep up",
-	Long: `This command will build the dependencies in requirements.yaml and then run helm dep up. 
+	Long: `This command will build the dependencies in requirements.yaml and then run helm dep up.
 No deployment or container builds will occur.`,
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		// Get a NewBoondoggle built from config.
-		b := boondoggle.NewBoondoggle()
+		var config boondoggle.RawBoondoggle
+		viper.Unmarshal(&config)
+		b := boondoggle.NewBoondoggle(config, viper.GetString("environment"), viper.GetString("set-state-all"), viper.GetStringSlice("service-state"))
 
 		//Build requirements.yml
-		r := boondoggle.BuildRequirements(b)
+		r := boondoggle.BuildRequirements(b, viper.GetStringSlice("state-v-override"))
 
 		// Write the new requirements.yml
 		out, err := yaml.Marshal(r)

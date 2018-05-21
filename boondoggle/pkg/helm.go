@@ -9,15 +9,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/spf13/viper"
-
 	sshterminal "golang.org/x/crypto/ssh/terminal"
 )
 
 //This file contains the helm commands run by boondoggle using values from Boondoggle
 
 // DoUpgrade builds and runs the helm upgrade --install command.
-func (b *Boondoggle) DoUpgrade() error {
+func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool) error {
 	fullcommand := []string{"upgrade", "-i"}
 
 	//Set global.projectLocation to the location of the boondoggle.yaml file.
@@ -55,13 +53,13 @@ func (b *Boondoggle) DoUpgrade() error {
 	}
 
 	// Add the namespace if there is one.
-	if namespace := viper.GetString("namespace"); namespace != "" {
+	if namespace != "" {
 		chunk := fmt.Sprintf("--namespace %s", namespace)
 		fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
 	}
 
 	// Add the release name
-	if release := viper.GetString("release"); release != "" {
+	if release != "" {
 		fullcommand = append(fullcommand, release)
 	}
 
@@ -70,7 +68,7 @@ func (b *Boondoggle) DoUpgrade() error {
 	fmt.Printf("helm %s\n", strings.Trim(fmt.Sprint(fullcommand), "[]"))
 
 	// Run the command
-	if dryRun := viper.GetBool("dry-run"); dryRun == false {
+	if dryRun == false {
 		cmd := exec.Command("helm", fullcommand...)
 		out, err := cmd.CombinedOutput()
 		fmt.Println(string(out))
