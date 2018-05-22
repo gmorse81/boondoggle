@@ -63,7 +63,7 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool) er
 		fullcommand = append(fullcommand, release)
 	}
 
-	fullcommand = append(fullcommand, fmt.Sprintf("./%s", b.Umbrella.Path))
+	fullcommand = append(fullcommand, b.Umbrella.Path)
 
 	fmt.Printf("helm %s\n", strings.Trim(fmt.Sprint(fullcommand), "[]"))
 

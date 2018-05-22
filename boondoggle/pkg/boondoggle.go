@@ -1,6 +1,7 @@
 package boondoggle
 
 import (
+	"path/filepath"
 	"fmt"
 	"os"
 	"strings"
@@ -153,7 +154,7 @@ func (b *Boondoggle) configureUmbrella(r RawBoondoggle, environment string) {
 	} else {
 		// build the environment in Boondoggle
 		b.Umbrella.Name = r.Umbrella.Name
-		b.Umbrella.Path = r.Umbrella.Path
+		b.Umbrella.Path, _ = filepath.Abs(r.Umbrella.Path)
 		b.Umbrella.Repository = r.Umbrella.Repository
 		b.Umbrella.Values = escapableEnvVarReplaceSlice(r.Umbrella.Environments[umbrellaEnvKey].Values)
 		b.Umbrella.Files = r.Umbrella.Environments[umbrellaEnvKey].Files
