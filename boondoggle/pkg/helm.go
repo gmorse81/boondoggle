@@ -2,7 +2,6 @@ package boondoggle
 
 import (
 	"fmt"
-	"log"
 	"net/url"
 	"os"
 	"os/exec"
@@ -102,7 +101,7 @@ func (b *Boondoggle) AddHelmRepos() error {
 	cmd := exec.Command("helm", "repo", "list")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("error with helm add repo list: %s", err)
+		return fmt.Errorf("error in boondoggle fetching the existing helm chart repos: %s", err)
 	}
 	for _, repo := range b.HelmRepos {
 		// Not the best implementation, but helm does not have a json output for helm repo list.
@@ -116,7 +115,7 @@ func (b *Boondoggle) AddHelmRepos() error {
 					fmt.Printf("Enter the username for repo %s: \n", repo.Name)
 					_, err := fmt.Scanln(&username)
 					if err != nil {
-						return fmt.Errorf("error with helm add repo: %s", err)
+						return fmt.Errorf("error with collecting username for helm chart repo: %s", err)
 					}
 				} else {
 					username = repo.Username
@@ -128,7 +127,7 @@ func (b *Boondoggle) AddHelmRepos() error {
 					fmt.Printf("Enter the password for %s: \n", username)
 					bytePassword, err := sshterminal.ReadPassword(0)
 					if err != nil {
-						return fmt.Errorf("error with helm add repo: %s", err)
+						return fmt.Errorf("error with collecting password for helm chart repo: %s", err)
 					}
 					password = string(bytePassword)
 				} else {
@@ -137,7 +136,7 @@ func (b *Boondoggle) AddHelmRepos() error {
 
 				u, err := url.Parse(repo.URL)
 				if err != nil {
-					return fmt.Errorf("error with helm add repo: %s", err)
+					return fmt.Errorf("error parsing the url of the chart repo when attempting to add to helm: %s", err)
 				}
 
 				//Add the basic auth username and password to the URL.
@@ -146,11 +145,11 @@ func (b *Boondoggle) AddHelmRepos() error {
 			} else { // else, add without the prompt for username and password.
 				u, err := url.Parse(repo.URL)
 				if err != nil {
-					return fmt.Errorf("error with helm add repo: %s", err)
+					return fmt.Errorf("error parsing the url of the chart repo: %s", err)
 				}
 				err = repoadd(repo.Name, u)
 				if err != nil {
-					return fmt.Errorf("error with helm add repo: %s", err)
+					return fmt.Errorf("error when trying to add a chart repo to helm registry: %s", err)
 				}
 			}
 		}
@@ -162,8 +161,20 @@ func repoadd(name string, u *url.URL) error {
 	cmd := exec.Command("helm", "repo", "add", name, u.String())
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatalf("cmd.Run() failed with %s\n", err)
+		return fmt.Errorf("error adding a repo to the helm repository: %s", err)
 	}
 	fmt.Print(string(out))
+	return nil
+}
+
+// SelfFetch will fetch the umbrella chart listed in the boondoggle.yml file and place it in the same directory.
+func (b *Boondoggle) SelfFetch(path string) error {
+	cleanRepo := strings.TrimPrefix(b.Umbrella.Repository, "@")
+	fetchcommand := fmt.Sprintf("fetch %s/%s --untar -d %s", cleanRepo, b.Umbrella.Name, path)
+	cmd := exec.Command("helm", strings.Split(fetchcommand, " ")...)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("error with self fetch: %s", string(out))
+	}
 	return nil
 }
