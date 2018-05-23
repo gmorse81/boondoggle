@@ -19,16 +19,18 @@ var release string
 var upCmd = &cobra.Command{
 	Use:   "up",
 	Short: "Runs 'helm upgrade --install' with config based on flags and the contents of boondoggle.yml",
-	Long: `boondoggle up with no extra flags will configure your defaults and deploy using helm. 
+	Long: `boondoggle up with no extra flags will configure your defaults and deploy using helm.
 	Flags can be used to change configuration based on your needs.`,
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		// Get a NewBoondoggle built from config.
-		b := boondoggle.NewBoondoggle()
+		var config boondoggle.RawBoondoggle
+		viper.Unmarshal(&config)
+		b := boondoggle.NewBoondoggle(config, viper.GetString("environment"), viper.GetString("set-state-all"), viper.GetStringSlice("service-state"))
 
 		//Build requirements.yml
-		r := boondoggle.BuildRequirements(b)
+		r := boondoggle.BuildRequirements(b, viper.GetStringSlice("state-v-override"))
 
 		// Write the new requirements.yml
 		out, err := yaml.Marshal(r)
@@ -45,7 +47,7 @@ var upCmd = &cobra.Command{
 		}
 
 		// Add the imagePullSecrets using kubectl
-		err = b.AddImagePullSecret()
+		err = b.AddImagePullSecret(viper.GetString("namespace"))
 		if err != nil {
 			return err
 		}
@@ -71,7 +73,7 @@ var upCmd = &cobra.Command{
 		}
 
 		// Run the helm upgrade --install command
-		err = b.DoUpgrade()
+		err = b.DoUpgrade(viper.GetString("namespace"), viper.GetString("release"), viper.GetBool("dry-run"))
 		if err != nil {
 			return err
 		}

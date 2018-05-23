@@ -1,11 +1,10 @@
 package boondoggle
 
 import (
+	"path/filepath"
 	"fmt"
 	"os"
 	"strings"
-
-	"github.com/spf13/viper"
 )
 
 // RawBoondoggle is the struct representation of the boondoggle.yml config file.
@@ -104,12 +103,10 @@ type Service struct {
 }
 
 // NewBoondoggle unmarshals the boondoggle.yml to RawBoondoggle and returns a processed Boondoggle struct type.
-func NewBoondoggle() Boondoggle {
-	var config RawBoondoggle
+func NewBoondoggle(config RawBoondoggle, environment string, setStateAll string, serviceState []string) Boondoggle {
 	var boondoggle Boondoggle
-	viper.Unmarshal(&config)
-	boondoggle.configureServices(config)
-	boondoggle.configureUmbrella(config)
+	boondoggle.configureServices(config, setStateAll, serviceState)
+	boondoggle.configureUmbrella(config, environment)
 	boondoggle.configureTopLevel(config)
 	return boondoggle
 }
@@ -140,8 +137,8 @@ func (b *Boondoggle) configureTopLevel(r RawBoondoggle) {
 }
 
 // converts RawBoondoggle into the umbrella configurations for Boondoggle
-func (b *Boondoggle) configureUmbrella(r RawBoondoggle) {
-	umbrellaEnv := viper.GetString("environment")
+func (b *Boondoggle) configureUmbrella(r RawBoondoggle, environment string) {
+	umbrellaEnv := environment
 	var umbrellaEnvKey int
 	var err error
 	// get the environments slice that matches the requested environment, or default if nothing is provided.
@@ -157,7 +154,7 @@ func (b *Boondoggle) configureUmbrella(r RawBoondoggle) {
 	} else {
 		// build the environment in Boondoggle
 		b.Umbrella.Name = r.Umbrella.Name
-		b.Umbrella.Path = r.Umbrella.Path
+		b.Umbrella.Path, _ = filepath.Abs(r.Umbrella.Path)
 		b.Umbrella.Repository = r.Umbrella.Repository
 		b.Umbrella.Values = escapableEnvVarReplaceSlice(r.Umbrella.Environments[umbrellaEnvKey].Values)
 		b.Umbrella.Files = r.Umbrella.Environments[umbrellaEnvKey].Files
@@ -174,16 +171,16 @@ func getRawUmbrellaEnvkeyByName(desiredEnvName string, r RawBoondoggle) (int, er
 }
 
 // Converts a RawBoondoggle into the services for Boondoggle so they can be consumed by the rest of the application.
-func (b *Boondoggle) configureServices(r RawBoondoggle) {
+func (b *Boondoggle) configureServices(r RawBoondoggle, setStateAll string, serviceState []string) {
 	// First get the service-state overrides provided by the user in a way that we can work with.
-	serviceStates := getServiceStatesMap()
+	serviceStates := getServiceStatesMap(serviceState)
 	// For each of the services on RawBoondoggle...
 	for _, rawService := range r.Services {
 		var chosenStateKey int
 		var err error
 
 		// If the set-state-all flag was not set, set service states with default logic.
-		overrideServiceState := viper.GetString("set-state-all")
+		overrideServiceState := setStateAll
 		if overrideServiceState == "" {
 			if serviceStates[rawService.Name] != "" {
 				// if we have a override in the serviceStates, get the state values based on that name.
@@ -237,9 +234,9 @@ func (b *Boondoggle) configureServices(r RawBoondoggle) {
 }
 
 // returns a mapping of the --service-state flags from the user's command.
-func getServiceStatesMap() map[string]string {
+func getServiceStatesMap(serviceState []string) map[string]string {
 	var serviceStatesMap = make(map[string]string)
-	for _, value := range viper.GetStringSlice("service-state") {
+	for _, value := range serviceState {
 		// --service-state flag is formatted "name=value", split on the "=" and return a map of the values.
 		splitServiceState := make([]string, 2)
 		splitServiceState = strings.Split(value, "=")

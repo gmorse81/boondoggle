@@ -2,14 +2,11 @@ package boondoggle
 
 import (
 	"fmt"
-	"log"
 	"net/url"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
-
-	"github.com/spf13/viper"
 
 	sshterminal "golang.org/x/crypto/ssh/terminal"
 )
@@ -17,7 +14,7 @@ import (
 //This file contains the helm commands run by boondoggle using values from Boondoggle
 
 // DoUpgrade builds and runs the helm upgrade --install command.
-func (b *Boondoggle) DoUpgrade() error {
+func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool) error {
 	fullcommand := []string{"upgrade", "-i"}
 
 	//Set global.projectLocation to the location of the boondoggle.yaml file.
@@ -55,22 +52,22 @@ func (b *Boondoggle) DoUpgrade() error {
 	}
 
 	// Add the namespace if there is one.
-	if namespace := viper.GetString("namespace"); namespace != "" {
+	if namespace != "" {
 		chunk := fmt.Sprintf("--namespace %s", namespace)
 		fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
 	}
 
 	// Add the release name
-	if release := viper.GetString("release"); release != "" {
+	if release != "" {
 		fullcommand = append(fullcommand, release)
 	}
 
-	fullcommand = append(fullcommand, fmt.Sprintf("./%s", b.Umbrella.Path))
+	fullcommand = append(fullcommand, b.Umbrella.Path)
 
 	fmt.Printf("helm %s\n", strings.Trim(fmt.Sprint(fullcommand), "[]"))
 
 	// Run the command
-	if dryRun := viper.GetBool("dry-run"); dryRun == false {
+	if dryRun == false {
 		cmd := exec.Command("helm", fullcommand...)
 		out, err := cmd.CombinedOutput()
 		fmt.Println(string(out))
@@ -104,7 +101,7 @@ func (b *Boondoggle) AddHelmRepos() error {
 	cmd := exec.Command("helm", "repo", "list")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("error with helm add repo list: %s", err)
+		return fmt.Errorf("error in boondoggle fetching the existing helm chart repos: %s", err)
 	}
 	for _, repo := range b.HelmRepos {
 		// Not the best implementation, but helm does not have a json output for helm repo list.
@@ -118,7 +115,7 @@ func (b *Boondoggle) AddHelmRepos() error {
 					fmt.Printf("Enter the username for repo %s: \n", repo.Name)
 					_, err := fmt.Scanln(&username)
 					if err != nil {
-						return fmt.Errorf("error with helm add repo: %s", err)
+						return fmt.Errorf("error with collecting username for helm chart repo: %s", err)
 					}
 				} else {
 					username = repo.Username
@@ -130,7 +127,7 @@ func (b *Boondoggle) AddHelmRepos() error {
 					fmt.Printf("Enter the password for %s: \n", username)
 					bytePassword, err := sshterminal.ReadPassword(0)
 					if err != nil {
-						return fmt.Errorf("error with helm add repo: %s", err)
+						return fmt.Errorf("error with collecting password for helm chart repo: %s", err)
 					}
 					password = string(bytePassword)
 				} else {
@@ -139,7 +136,7 @@ func (b *Boondoggle) AddHelmRepos() error {
 
 				u, err := url.Parse(repo.URL)
 				if err != nil {
-					return fmt.Errorf("error with helm add repo: %s", err)
+					return fmt.Errorf("error parsing the url of the chart repo when attempting to add to helm: %s", err)
 				}
 
 				//Add the basic auth username and password to the URL.
@@ -148,11 +145,11 @@ func (b *Boondoggle) AddHelmRepos() error {
 			} else { // else, add without the prompt for username and password.
 				u, err := url.Parse(repo.URL)
 				if err != nil {
-					return fmt.Errorf("error with helm add repo: %s", err)
+					return fmt.Errorf("error parsing the url of the chart repo: %s", err)
 				}
 				err = repoadd(repo.Name, u)
 				if err != nil {
-					return fmt.Errorf("error with helm add repo: %s", err)
+					return fmt.Errorf("error when trying to add a chart repo to helm registry: %s", err)
 				}
 			}
 		}
@@ -164,8 +161,20 @@ func repoadd(name string, u *url.URL) error {
 	cmd := exec.Command("helm", "repo", "add", name, u.String())
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatalf("cmd.Run() failed with %s\n", err)
+		return fmt.Errorf("error adding a repo to the helm repository: %s", err)
 	}
 	fmt.Print(string(out))
+	return nil
+}
+
+// SelfFetch will fetch the umbrella chart listed in the boondoggle.yml file and place it in the same directory.
+func (b *Boondoggle) SelfFetch(path string) error {
+	cleanRepo := strings.TrimPrefix(b.Umbrella.Repository, "@")
+	fetchcommand := fmt.Sprintf("fetch %s/%s --untar -d %s", cleanRepo, b.Umbrella.Name, path)
+	cmd := exec.Command("helm", strings.Split(fetchcommand, " ")...)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("error with self fetch: %s", string(out))
+	}
 	return nil
 }
