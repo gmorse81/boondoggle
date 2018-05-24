@@ -1,9 +1,9 @@
 package boondoggle
 
 import (
-	"path/filepath"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -65,6 +65,7 @@ type Boondoggle struct {
 	HelmRepos       []HelmRepo
 	Umbrella        Umbrella
 	Services        []Service
+	ExtraEnv        map[string]string
 }
 
 // HelmRepo is the data needed to add a Helm Repository. Part of Boondoggle struct.
@@ -103,8 +104,9 @@ type Service struct {
 }
 
 // NewBoondoggle unmarshals the boondoggle.yml to RawBoondoggle and returns a processed Boondoggle struct type.
-func NewBoondoggle(config RawBoondoggle, environment string, setStateAll string, serviceState []string) Boondoggle {
+func NewBoondoggle(config RawBoondoggle, environment string, setStateAll string, serviceState []string, extraEnv map[string]string) Boondoggle {
 	var boondoggle Boondoggle
+	boondoggle.ExtraEnv = extraEnv
 	boondoggle.configureServices(config, setStateAll, serviceState)
 	boondoggle.configureUmbrella(config, environment)
 	boondoggle.configureTopLevel(config)
@@ -121,16 +123,16 @@ func (s Service) GetHelmDepName() string {
 
 func (b *Boondoggle) configureTopLevel(r RawBoondoggle) {
 	b.PullSecretsName = r.PullSecretsName
-	b.DockerEmail = escapableEnvVarReplace(r.DockerEmail)
-	b.DockerPassword = escapableEnvVarReplace(r.DockerPassword)
-	b.DockerUsername = escapableEnvVarReplace(r.DockerUsername)
+	b.DockerEmail = b.escapableEnvVarReplace(r.DockerEmail)
+	b.DockerPassword = b.escapableEnvVarReplace(r.DockerPassword)
+	b.DockerUsername = b.escapableEnvVarReplace(r.DockerUsername)
 	for _, helmrepo := range r.HelmRepos {
 		var repoDetails = HelmRepo{
 			Name:            helmrepo.Name,
 			URL:             helmrepo.URL,
 			Promptbasicauth: helmrepo.Promptbasicauth,
-			Username:        escapableEnvVarReplace(helmrepo.Username),
-			Password:        escapableEnvVarReplace(helmrepo.Password),
+			Username:        b.escapableEnvVarReplace(helmrepo.Username),
+			Password:        b.escapableEnvVarReplace(helmrepo.Password),
 		}
 		b.HelmRepos = append(b.HelmRepos, repoDetails)
 	}
@@ -156,7 +158,7 @@ func (b *Boondoggle) configureUmbrella(r RawBoondoggle, environment string) {
 		b.Umbrella.Name = r.Umbrella.Name
 		b.Umbrella.Path, _ = filepath.Abs(r.Umbrella.Path)
 		b.Umbrella.Repository = r.Umbrella.Repository
-		b.Umbrella.Values = escapableEnvVarReplaceSlice(r.Umbrella.Environments[umbrellaEnvKey].Values)
+		b.Umbrella.Values = b.escapableEnvVarReplaceSlice(r.Umbrella.Environments[umbrellaEnvKey].Values)
 		b.Umbrella.Files = r.Umbrella.Environments[umbrellaEnvKey].Files
 	}
 }
@@ -204,9 +206,9 @@ func (b *Boondoggle) configureServices(r RawBoondoggle, setStateAll string, serv
 				Gitrepo:        rawService.Gitrepo,
 				Alias:          rawService.Alias,
 				Chart:          rawService.Chart,
-				ContainerBuild: escapableEnvVarReplace(rawService.States[chosenStateKey].ContainerBuild),
+				ContainerBuild: b.escapableEnvVarReplace(rawService.States[chosenStateKey].ContainerBuild),
 				Repository:     rawService.States[chosenStateKey].Repository,
-				HelmValues:     escapableEnvVarReplaceSlice(rawService.States[chosenStateKey].HelmValues),
+				HelmValues:     b.escapableEnvVarReplaceSlice(rawService.States[chosenStateKey].HelmValues),
 				Version:        rawService.States[chosenStateKey].Version,
 				Condition:      rawService.States[chosenStateKey].Condition,
 				Tags:           rawService.States[chosenStateKey].Tags,
@@ -264,19 +266,33 @@ func getRawStateKeyByName(desiredServiceName string, desiredServiceState string,
 }
 
 //replace env vars in a string slice.
-func escapableEnvVarReplaceSlice(s []string) []string {
+func (b *Boondoggle) escapableEnvVarReplaceSlice(s []string) []string {
 	for key, val := range s {
-		s[key] = escapableEnvVarReplace(val)
+		s[key] = b.escapableEnvVarReplace(val)
 	}
 	return s
 }
 
 //escapableEnvVarReplace wraps os.Getenv to allow for escaping with $$.
-func escapableEnvVarReplace(s string) string {
+//populates from either the system's environment variables or Boondoggle.ExtraEnv
+func (b *Boondoggle) escapableEnvVarReplace(s string) string {
 	return os.Expand(s, func(s string) string {
 		if s == "$" {
 			return "$"
 		}
-		return os.Getenv(s)
+
+		realEnvVal := os.Getenv(s)
+		extraEnvVal := ""
+		for key, val := range b.ExtraEnv {
+			if s == key {
+				extraEnvVal = val
+			}
+		}
+
+		if extraEnvVal != "" {
+			return extraEnvVal
+		}
+
+		return realEnvVal
 	})
 }

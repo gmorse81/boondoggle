@@ -2,12 +2,6 @@
 
 
 [[projects]]
-  name = "github.com/davecgh/go-spew"
-  packages = ["spew"]
-  revision = "346938d642f2ec3594ed81d874461961cd0faa76"
-  version = "v1.1.0"
-
-[[projects]]
   name = "github.com/emirpasic/gods"
   packages = [
     "containers",
@@ -278,6 +272,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "19137be2a1ab54f2e9a27c4e94d8362fe9de1f472a9b1089201be1532be1e1f6"
+  inputs-digest = "be975a857f4782c6164192235eceb4ff4801482bc7443d63595d4bc890c5540e"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -15,8 +15,10 @@ func (b *Boondoggle) AddImagePullSecret(namespace string) error {
 		// Create the namespace in the cluster if there is one provided
 		if namespace != "" {
 			namespaceCommand := exec.Command("kubectl", "create", "namespace", namespace)
-			out, _ := namespaceCommand.CombinedOutput()
-			fmt.Println(string(out))
+			out, err := namespaceCommand.CombinedOutput()
+			if err != nil && !strings.Contains(string(out), "Error from server (AlreadyExists)") {
+				fmt.Println(string(out))
+			}
 		}
 
 		// Determine if it's already set up.
