@@ -167,10 +167,15 @@ func repoadd(name string, u *url.URL) error {
 	return nil
 }
 
-// SelfFetch will fetch the umbrella chart listed in the boondoggle.yml file and place it in the same directory.
-func (b *Boondoggle) SelfFetch(path string) error {
+// SelfFetch will fetch the umbrella chart listed in the boondoggle.yml file.
+func (b *Boondoggle) SelfFetch(path string, version string) error {
 	cleanRepo := strings.TrimPrefix(b.Umbrella.Repository, "@")
-	fetchcommand := fmt.Sprintf("fetch %s/%s --untar -d %s", cleanRepo, b.Umbrella.Name, path)
+	var fetchcommand string
+	if version == "" {
+		fetchcommand = fmt.Sprintf("fetch %s/%s --untar -d %s", cleanRepo, b.Umbrella.Name, path)
+	} else {
+		fetchcommand = fmt.Sprintf("fetch %s/%s --untar --version=%s -d %s", cleanRepo, b.Umbrella.Name, version, path)
+	}
 	cmd := exec.Command("helm", strings.Split(fetchcommand, " ")...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
