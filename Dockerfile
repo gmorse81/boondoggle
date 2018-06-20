@@ -2,13 +2,13 @@
 FROM alpine:3.6 as build
 
 RUN apk add --update --no-cache \
-ca-certificates \ 
+ca-certificates \
 curl \
 git \
 gzip \
 tar
 
-ARG VERSION=v2.8.1
+ARG VERSION=v2.9.1
 ARG FILENAME=helm-${VERSION}-linux-amd64.tar.gz
 
 WORKDIR /
