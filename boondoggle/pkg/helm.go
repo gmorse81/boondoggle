@@ -62,6 +62,11 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool) er
 		fullcommand = append(fullcommand, release)
 	}
 
+	// Add a longer timeout
+	chunk := "--timeout 1800"
+	fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
+
+	// Add the umbrella path
 	fullcommand = append(fullcommand, b.Umbrella.Path)
 
 	fmt.Printf("helm %s\n", strings.Trim(fmt.Sprint(fullcommand), "[]"))
