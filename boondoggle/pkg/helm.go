@@ -74,9 +74,10 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool) er
 		fmt.Println("Installing the environment...")
 		cmd := exec.Command("helm", fullcommand...)
 		out, err := cmd.CombinedOutput()
-		fmt.Println(string(out))
 		if err != nil {
 			return fmt.Errorf("Helm upgrade command reported error: %s", string(out))
+		} else {
+			fmt.Println(string(out))
 		}
 	} else {
 		fmt.Printf("helm %s\n", strings.Trim(fmt.Sprint(fullcommand), "[]"))
