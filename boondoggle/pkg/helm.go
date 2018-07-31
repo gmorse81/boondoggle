@@ -69,16 +69,17 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool) er
 	// Add the umbrella path
 	fullcommand = append(fullcommand, b.Umbrella.Path)
 
-	fmt.Printf("helm %s\n", strings.Trim(fmt.Sprint(fullcommand), "[]"))
-
 	// Run the command
 	if dryRun == false {
+		fmt.Println("Installing the environment...")
 		cmd := exec.Command("helm", fullcommand...)
 		out, err := cmd.CombinedOutput()
 		fmt.Println(string(out))
 		if err != nil {
-			return fmt.Errorf("Helm upgrade command reported error: %s", err)
+			return fmt.Errorf("Helm upgrade command reported error: %s", string(out))
 		}
+	} else {
+		fmt.Printf("helm %s\n", strings.Trim(fmt.Sprint(fullcommand), "[]"))
 	}
 
 	return nil
@@ -87,10 +88,10 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool) er
 //DepUp runs "helm dependency update".
 func (b *Boondoggle) DepUp() error {
 	cmd := exec.Command("helm", "dep", "up", b.Umbrella.Path)
-	out, err := cmd.CombinedOutput()
-	fmt.Println(string(out))
+	_, err := cmd.CombinedOutput()
+	fmt.Println("Updating dependencies...")
 	if err != nil {
-		return fmt.Errorf("error with helm dep up: %s", err)
+		return fmt.Errorf("There was an error updating the dependencies on the umbrella: %s", err)
 	}
 	return nil
 }
@@ -105,6 +106,7 @@ It will not do anything if the repo is already added.
 func (b *Boondoggle) AddHelmRepos() error {
 	cmd := exec.Command("helm", "repo", "list")
 	out, err := cmd.CombinedOutput()
+	fmt.Println("Adding helm repos...")
 	if err != nil {
 		return fmt.Errorf("error in boondoggle fetching the existing helm chart repos: %s", err)
 	}
@@ -166,9 +168,8 @@ func repoadd(name string, u *url.URL) error {
 	cmd := exec.Command("helm", "repo", "add", name, u.String())
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("error adding a repo to the helm repository: %s", err)
+		return fmt.Errorf("error adding a repo to the helm repository: %s", string(out))
 	}
-	fmt.Print(string(out))
 	return nil
 }
 
@@ -183,6 +184,7 @@ func (b *Boondoggle) SelfFetch(path string, version string) error {
 	}
 	cmd := exec.Command("helm", strings.Split(fetchcommand, " ")...)
 	out, err := cmd.CombinedOutput()
+	fmt.Println("Fetching the umbrella...")
 	if err != nil {
 		return fmt.Errorf("error with self fetch: %s", string(out))
 	}
