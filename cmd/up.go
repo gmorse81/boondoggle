@@ -73,10 +73,12 @@ var upCmd = &cobra.Command{
 		}
 
 		// Run the helm upgrade --install command
-		err = b.DoUpgrade(viper.GetString("namespace"), viper.GetString("release"), viper.GetBool("dry-run"))
+		out, err = b.DoUpgrade(viper.GetString("namespace"), viper.GetString("release"), viper.GetBool("dry-run"))
 		if err != nil {
-			return err
+			return fmt.Errorf("Helm upgrade command reported error: %s", string(out))
 		}
+		fmt.Println(string(out))
+
 		return nil
 	},
 }
