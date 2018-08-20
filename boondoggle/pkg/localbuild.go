@@ -70,7 +70,7 @@ func (b *Boondoggle) DoPostDeployExec(namespace string) error {
 	return nil
 }
 
-// RunTestCommand executes the test command against the test cluster on the specified namespace and umbrella.
+// runExecCommand executes the command against the cluster on the specified namespace and app and container combo.
 func (b *Boondoggle) runExecCommand(namespace string, appName string, container string, command []string) (string, error) {
 
 	// Get the pod name based on the namespace and the app= tag
