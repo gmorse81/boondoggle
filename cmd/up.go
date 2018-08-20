@@ -60,6 +60,10 @@ var upCmd = &cobra.Command{
 
 		// Build the containers that need to be built.
 		if skipDocker != true {
+			err = b.DoPreDeploySteps()
+			if err != nil {
+				return err
+			}
 			err = b.DoBuild()
 			if err != nil {
 				return err
@@ -78,6 +82,17 @@ var upCmd = &cobra.Command{
 			return fmt.Errorf("Helm upgrade command reported error: %s", string(out))
 		}
 		fmt.Println(string(out))
+
+		if skipDocker != true {
+			err = b.DoPostDeploySteps()
+			if err != nil {
+				return err
+			}
+			err = b.DoPostDeployExec(viper.GetString("namespace"))
+			if err != nil {
+				return err
+			}
+		}
 
 		return nil
 	},

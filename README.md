@@ -79,9 +79,20 @@ services:
     states:
       # This state is called "local"
       - state-name: local
-        # If specified, and the repository name is "localdev", this command will be run to build the dockerfile in this project.
+        # If specified, and the repository name is "localdev", these commands will be run before the helm deployment.
         # use of environment vars is supported. eg. - "build -t myaccount/myimage:${MY_CI_TAG} source-projects/my-dependency/."
-        container-build: "build -t myaccount/myimage:dev source-projects/my-dependency/."
+        preDeploySteps:
+          - cmd: docker
+            args: ["build", "-t", "myaccount/myimage:dev", "source-projects/my-dependency/."]
+        # If specified, and the repository name is "localdev", these commands will be run after the helm deployment.
+        postDeploySteps:
+          - cmd: docker
+            args: ["run", "--rm", "-t", "-v", "${PWD}/source-projects/my-dependency:/usr/src/app", "-e", "NODE_ENV=development", "myaccount/myimage:dev", "npm", "install"]
+        # If specified, and the repository name is "localdev", these commands will be executed inside the container. It will find a pod with an "app" label matching the app value, then exec the command specified in "args" against the container specified in "container".
+        postDeployExec:
+          - app: my-pod-app-name
+            container: my-container-name
+            args: ["touch", "/testfile"]
         # Values passe to the helm install command like this: --set awesome-chart.localdev=true note that the alias or chart value is prepended to the value automatically by boondoggle
         # use of environment vars is supported. eg. - "thisdir=${PWD}"
         helm-values:

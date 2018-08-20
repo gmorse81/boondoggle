@@ -52,6 +52,19 @@ type RawBoondoggle struct {
 			Tags           []string      `mapstructure:"tags,omitempty"`
 			Enabled        bool          `mapstructure:"enabled,omitempty"`
 			Importvalues   []interface{} `mapstructure:"importvalues,omitempty"`
+			PreDeploySteps []struct {
+				Cmd  string   `mapstructure:"cmd,omitempty"`
+				Args []string `mapstructure:"args,omitempty"`
+			} `mapstructure:"preDeploySteps,omitempty"`
+			PostDeploySteps []struct {
+				Cmd  string   `mapstructure:"cmd,omitempty"`
+				Args []string `mapstructure:"args,omitempty"`
+			} `mapstructure:"postDeploySteps,omitempty"`
+			PostDeployExec []struct {
+				App       string   `mapstructure:"app,omitempty"`
+				Container string   `mapstructure:"container,omitempty"`
+				Args      []string `mapstructure:"args,omitempty"`
+			} `mapstructure:"postDeployExec,omitempty"`
 		} `mapstructure:"states"`
 	} `mapstructure:"services"`
 }
@@ -86,21 +99,32 @@ type Umbrella struct {
 	Values     []string
 }
 
+// Step contains instructions for a pre, post or post exec build step for local.
+type Step struct {
+	App       string
+	Container string
+	Cmd       string
+	Args      []string
+}
+
 // Service is the definition of a service (an umbrella dependency). Part of Boondoggle struct.
 type Service struct {
-	Name           string
-	Path           string
-	Gitrepo        string
-	Alias          string
-	Chart          string
-	ContainerBuild string
-	Repository     string
-	HelmValues     []string
-	Version        string
-	Condition      string
-	Tags           []string
-	Enabled        bool
-	Importvalues   []interface{}
+	Name            string
+	Path            string
+	Gitrepo         string
+	Alias           string
+	Chart           string
+	ContainerBuild  string
+	Repository      string
+	HelmValues      []string
+	Version         string
+	Condition       string
+	Tags            []string
+	Enabled         bool
+	Importvalues    []interface{}
+	PreDeploySteps  []Step
+	PostDeploySteps []Step
+	PostDeployExec  []Step
 }
 
 // NewBoondoggle unmarshals the boondoggle.yml to RawBoondoggle and returns a processed Boondoggle struct type.
@@ -227,6 +251,35 @@ func (b *Boondoggle) configureServices(r RawBoondoggle, setStateAll string, serv
 			}
 			if completeService.Importvalues == nil {
 				completeService.Importvalues = rawService.DepValuesAllStates.Importvalues
+			}
+
+			// Add the pre and post steps
+			if len(rawService.States[chosenStateKey].PreDeploySteps) > 0 {
+				for _, val := range rawService.States[chosenStateKey].PreDeploySteps {
+					completeService.PreDeploySteps = append(completeService.PreDeploySteps, Step{
+						Cmd:  val.Cmd,
+						Args: b.escapableEnvVarReplaceSlice(val.Args),
+					})
+				}
+			}
+
+			if len(rawService.States[chosenStateKey].PostDeploySteps) > 0 {
+				for _, val := range rawService.States[chosenStateKey].PostDeploySteps {
+					completeService.PostDeploySteps = append(completeService.PostDeploySteps, Step{
+						Cmd:  val.Cmd,
+						Args: b.escapableEnvVarReplaceSlice(val.Args),
+					})
+				}
+			}
+
+			if len(rawService.States[chosenStateKey].PostDeployExec) > 0 {
+				for _, val := range rawService.States[chosenStateKey].PostDeployExec {
+					completeService.PostDeployExec = append(completeService.PostDeployExec, Step{
+						App:       val.App,
+						Container: val.Container,
+						Args:      b.escapableEnvVarReplaceSlice(val.Args),
+					})
+				}
 			}
 
 			// Append to Boondoggle.Services

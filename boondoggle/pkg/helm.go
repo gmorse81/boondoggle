@@ -44,7 +44,7 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool) ([
 
 	// For services running in local dev, add the cachebuster
 	for _, service := range b.Services {
-		if service.Repository == "localdev" && service.ContainerBuild != "" {
+		if service.Repository == "localdev" {
 			now := time.Now()
 			chunk := fmt.Sprintf("--set %s.boondoggleCacheBust='%d'", service.GetHelmDepName(), now.Unix())
 			fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
@@ -63,7 +63,7 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool) ([
 	}
 
 	// Add a longer timeout
-	chunk := "--timeout 1800"
+	chunk := "--timeout 1800 --wait"
 	fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
 
 	// Add the umbrella path
