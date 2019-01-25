@@ -1,0 +1,35 @@
+pipeline:
+  clone:
+    image: plugins/git
+    tags: true
+
+  unit_test:
+    image: golang:1.11
+    commands:
+      - mkdir -p $GOPATH/src/github.com/gmorse81
+      - cp -r ../boondoggle $GOPATH/src/github.com/gmorse81/boondoggle
+      - cd $GOPATH/src/github.com/gmorse81/boondoggle
+      - go test -v ./...
+    when:
+      event: [ pull_request, tag ]
+      branch: master
+
+  homebrew_build:
+    image: golang:1.11
+    secrets: [github_token]
+    commands:
+      - curl -sL https://git.io/goreleaser | bash
+    when:
+      event: [ tag ]
+      branch: master
+      status: [ success ]
+
+  docker_build:
+    image: plugins/docker
+    repo: gmorse81/boondoggle
+    secrets: [ docker_username, docker_password ]
+    auto_tag: true
+    when:
+      event: [ tag ]
+      branch: master
+      status: [ success ]

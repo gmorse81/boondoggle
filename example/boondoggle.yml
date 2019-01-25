@@ -1,0 +1,67 @@
+pull-secrets-name: dockerregcred
+docker_username: ${DOCKER_USERNAME}
+docker_password: ${DOCKER_PASSWORD}
+docker_email: ${DOCKER_EMAIL}
+
+helm-repos:
+  - name: stable
+    url: https://kubernetes-charts.storage.googleapis.com
+
+  - name: my-private-repo
+    url: https://example.com/my-private-repo
+    promptbasicauth: true
+    username: someusername
+    password: ${HELM_PASS}
+
+# NOTE: only specify "values" here if they require the use of environment variables.
+# otherwise, please use the .yml file associated with the specific environment.
+umbrella:
+  name: my-umbrella
+  path: /my-umbrella
+  repository: "@my-private-repo"
+  environments:
+    - name: dev
+      files:
+        - "local.yml"
+
+    - name: test
+      files:
+        - "test.yml"
+      values:
+        - "global.myglobalvalue=SomeValueTest"
+
+    - name: default
+      files:
+        - "prod.yml"
+      values:
+        - "global.myglobalvalue=${FOO}"
+
+services:
+  - name: Service1
+    path: source-projects/service1
+    gitrepo: git@github.com:myaccount/myrepo.git
+    chart: service1-chart
+    states:
+      - state-name: local
+        version: x
+        repository: localdev
+
+      - state-name: default
+        repository: "@my-private-repo"
+        version: ~1
+
+  - name: service2
+    path: source-projects/service2
+    gitrepo: git@github.com:myaccount/myrepo2.git
+    alias: alias-service2
+    chart: service2-chart
+    states:
+      - state-name: local
+        version: x
+        helm-values:
+          - "localdev=true"
+        repository: localdev
+
+      - state-name: default
+        repository: "@my-private-repo"
+        version: ~1

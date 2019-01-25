@@ -22,6 +22,7 @@ var stateValueOverride []string
 var dryRun bool
 var setStateAll string
 var skipDocker bool
+var useSecrets bool
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -46,6 +47,9 @@ func init() {
 
 	rootCmd.PersistentFlags().BoolVarP(&dryRun, "dry-run", "d", false, "Dry run will do all steps except for the helm deploy. The helm command that would have been run will be printed.")
 	viper.BindPFlag("dry-run", rootCmd.PersistentFlags().Lookup("dry-run"))
+
+	rootCmd.PersistentFlags().BoolVar(&useSecrets, "helm-secrets", false, "Use the Helm Secrets plugin.")
+	viper.BindPFlag("helm-secrets", rootCmd.PersistentFlags().Lookup("helm-secrets"))
 
 	rootCmd.PersistentFlags().StringVarP(&setStateAll, "set-state-all", "a", "", "Sets all services to the same state.")
 	viper.BindPFlag("set-state-all", rootCmd.PersistentFlags().Lookup("set-state-all"))
