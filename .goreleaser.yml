@@ -10,7 +10,6 @@ builds:
 
 brew:
   name: boondoggle
-  folder: Formula
   homepage: "https://github.com/gmorse81/boondoggle"
   github:
     owner: gmorse81
