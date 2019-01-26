@@ -1,6 +1,10 @@
 kind: pipeline
 name: default
 
+workspace:
+  base: /go
+  path: src/github.com/gmorse81/boondoggle
+
 steps:
   - name: fetch
     image: plugins/git
@@ -10,10 +14,6 @@ steps:
   - name: unit_test
     image: golang:1.11
     commands:
-      - ls
-      - mkdir -p $GOPATH/src/github.com/gmorse81
-      - cp -r ../boondoggle $GOPATH/src/github.com/gmorse81/boondoggle
-      - cd $GOPATH/src/github.com/gmorse81/boondoggle
       - go test -v ./...
     when:
       event: [ pull_request, tag ]
