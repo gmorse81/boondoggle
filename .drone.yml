@@ -10,7 +10,7 @@ steps:
   - name: unit_test
     image: golang:1.11
     commands:
-      - echo $${PWD}
+      - ls
       - mkdir -p $GOPATH/src/github.com/gmorse81
       - cp -r ../boondoggle $GOPATH/src/github.com/gmorse81/boondoggle
       - cd $GOPATH/src/github.com/gmorse81/boondoggle
