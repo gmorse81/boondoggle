@@ -31,7 +31,6 @@ steps:
 
   - name: docker_build
     image: plugins/docker
-    repo: gmorse81/boondoggle
     environment:
       DOCKER_USERNAME:
         from_secret: docker_username
@@ -39,6 +38,7 @@ steps:
         from_secret: docker_password
     settings:
       auto_tag: true
+      repo: gmorse81/boondoggle
     when:
       event: [ tag ]
       status: [ success ]
