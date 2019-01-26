@@ -14,7 +14,7 @@ import (
 //This file contains the helm commands run by boondoggle using values from Boondoggle
 
 // DoUpgrade builds and runs the helm upgrade --install command.
-func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool) ([]byte, error) {
+func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, useSecrets bool) ([]byte, error) {
 	fullcommand := []string{"upgrade", "-i"}
 
 	//Set global.projectLocation to the location of the boondoggle.yaml file.
@@ -69,16 +69,20 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool) ([
 	// Add the umbrella path
 	fullcommand = append(fullcommand, b.Umbrella.Path)
 
+	if useSecrets {
+		fullcommand = append([]string{"secrets"}, fullcommand...)
+	}
+
+	cmd := exec.Command("helm", fullcommand...)
+
 	// Run the command
 	if dryRun == false {
 		fmt.Println("Installing the environment...")
-		cmd := exec.Command("helm", fullcommand...)
 		out, err := cmd.CombinedOutput()
 		return out, err
-
 	}
 
-	return []byte(fmt.Sprintf("helm %s\n", strings.Trim(fmt.Sprint(fullcommand), "[]"))), nil
+	return []byte(fmt.Sprintf("%s", cmd.Args)), nil
 
 }
 

@@ -8,7 +8,7 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"github.com/gmorse81/boondoggle/boondoggle/pkg"
+	"github.com/gmorse81/boondoggle/boondoggle"
 	"github.com/spf13/cobra"
 )
 
@@ -77,7 +77,7 @@ var upCmd = &cobra.Command{
 		}
 
 		// Run the helm upgrade --install command
-		out, err = b.DoUpgrade(viper.GetString("namespace"), viper.GetString("release"), viper.GetBool("dry-run"))
+		out, err = b.DoUpgrade(viper.GetString("namespace"), viper.GetString("release"), viper.GetBool("dry-run"), viper.GetBool("helm-secrets"))
 		if err != nil {
 			return fmt.Errorf("Helm upgrade command reported error: %s", string(out))
 		}

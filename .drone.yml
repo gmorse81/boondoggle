@@ -1,0 +1,47 @@
+kind: pipeline
+name: default
+
+workspace:
+  base: /go
+  path: src/github.com/gmorse81/boondoggle
+
+steps:
+  - name: fetch
+    image: plugins/git
+    commands:
+      - git fetch --tags
+
+  - name: unit_test
+    image: golang:1.11
+    commands:
+      - go test -v ./...
+    when:
+      event: [ pull_request, tag ]
+      branch: master
+
+  - name: homebrew_build
+    image: golang:1.11
+    environment:
+      GITHUB_TOKEN:
+        from_secret: github_token
+    commands:
+      - curl -sL https://git.io/goreleaser | bash
+    when:
+      event: [ tag ]
+      branch: master
+      status: [ success ]
+
+  - name: docker_build
+    image: plugins/docker
+    repo: gmorse81/boondoggle
+    environment:
+      DOCKER_USERNAME:
+        from_secret: docker_username
+      DOCKER_PASSWORD:
+        from_secret: docker_password
+    settings:
+      auto_tag: true
+    when:
+      event: [ tag ]
+      branch: master
+      status: [ success ]
