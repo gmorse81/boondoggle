@@ -1,9 +1,13 @@
-pipeline:
-  clone:
-    image: plugins/git
-    tags: true
+kind: pipeline
+name: default
 
-  unit_test:
+steps:
+  - name: fetch
+    image: plugins/git
+    commands:
+      - git fetch --tags
+
+  - name: unit_test
     image: golang:1.11
     commands:
       - mkdir -p $GOPATH/src/github.com/gmorse81
@@ -14,9 +18,11 @@ pipeline:
       event: [ pull_request, tag ]
       branch: master
 
-  homebrew_build:
+  - name: homebrew_build
     image: golang:1.11
-    secrets: [github_token]
+    environment:
+      GITHUB_TOKEN:
+        from_secret: github_token
     commands:
       - curl -sL https://git.io/goreleaser | bash
     when:
@@ -24,11 +30,16 @@ pipeline:
       branch: master
       status: [ success ]
 
-  docker_build:
+  - name: docker_build
     image: plugins/docker
     repo: gmorse81/boondoggle
-    secrets: [ docker_username, docker_password ]
-    auto_tag: true
+    environment:
+      DOCKER_USERNAME:
+        from_secret: docker_username
+      DOCKER_PASSWORD:
+        from_secret: docker_password
+    settings:
+      auto_tag: true
     when:
       event: [ tag ]
       branch: master
