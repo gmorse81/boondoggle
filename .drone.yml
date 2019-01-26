@@ -17,7 +17,6 @@ steps:
       - go test -v ./...
     when:
       event: [ pull_request, tag ]
-      branch: master
 
   - name: homebrew_build
     image: golang:1.11
@@ -28,7 +27,6 @@ steps:
       - curl -sL https://git.io/goreleaser | bash
     when:
       event: [ tag ]
-      branch: master
       status: [ success ]
 
   - name: docker_build
@@ -43,5 +41,4 @@ steps:
       auto_tag: true
     when:
       event: [ tag ]
-      branch: master
       status: [ success ]
