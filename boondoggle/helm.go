@@ -17,6 +17,14 @@ import (
 func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, useSecrets bool, tls bool, tillerNamespace string) ([]byte, error) {
 	fullcommand := []string{"upgrade", "-i"}
 
+	// Add the release name
+	if release != "" {
+		fullcommand = append(fullcommand, release)
+	}
+
+	// Add the umbrella path
+	fullcommand = append(fullcommand, b.Umbrella.Path)
+
 	// Add files from the umbrella declartion
 	for _, file := range b.Umbrella.Files {
 		chunk := fmt.Sprintf("-f %s/%s", b.Umbrella.Path, file)
@@ -70,16 +78,8 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, us
 		fullcommand = append(fullcommand, "--tls")
 	}
 
-	// Add the umbrella path
-	fullcommand = append(fullcommand, b.Umbrella.Path)
-
 	if useSecrets {
 		fullcommand = append([]string{"secrets"}, fullcommand...)
-	}
-
-	// Add the release name
-	if release != "" {
-		fullcommand = append(fullcommand, release)
 	}
 
 	cmd := exec.Command("helm", fullcommand...)
