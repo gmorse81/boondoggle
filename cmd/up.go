@@ -14,6 +14,8 @@ import (
 
 var namespace string
 var release string
+var tillerNamespace string
+var tls bool
 
 // upCmd represents the up command
 var upCmd = &cobra.Command{
@@ -105,6 +107,12 @@ func init() {
 
 	upCmd.Flags().StringVar(&namespace, "namespace", "", "The kubernetes namespace of this release")
 	viper.BindPFlag("namespace", upCmd.Flags().Lookup("namespace"))
+
+	upCmd.Flags().StringVar(&tillerNamespace, "tiller-namespace", "kube-system", "The namespace where tiller resides")
+	viper.BindPFlag("tiller-namespace", upCmd.Flags().Lookup("tiller-namespace"))
+
+	upCmd.Flags().BoolVar(&tls, "tls", false, "Use TLS with tiller - requires key and certs in your helm home dir")
+	viper.BindPFlag("tls", upCmd.Flags().Lookup("tls"))
 
 	rootCmd.AddCommand(upCmd)
 }
