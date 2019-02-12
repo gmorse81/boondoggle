@@ -14,19 +14,19 @@ import (
 //This file contains the helm commands run by boondoggle using values from Boondoggle
 
 // DoUpgrade builds and runs the helm upgrade --install command.
-func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, useSecrets bool) ([]byte, error) {
+func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, useSecrets bool, tls bool, tillerNamespace string) ([]byte, error) {
 	fullcommand := []string{"upgrade", "-i"}
-
-	//Set global.projectLocation to the location of the boondoggle.yaml file.
-	//This can be used to map volumes for local dev.
-	projectLocation := fmt.Sprintf("--set global.projectLocation=%s", os.Getenv("PWD"))
-	fullcommand = append(fullcommand, strings.Split(projectLocation, " ")...)
 
 	// Add files from the umbrella declartion
 	for _, file := range b.Umbrella.Files {
 		chunk := fmt.Sprintf("-f %s/%s", b.Umbrella.Path, file)
 		fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
 	}
+
+	//Set global.projectLocation to the location of the boondoggle.yaml file.
+	//This can be used to map volumes for local dev.
+	projectLocation := fmt.Sprintf("--set global.projectLocation=%s", os.Getenv("PWD"))
+	fullcommand = append(fullcommand, strings.Split(projectLocation, " ")...)
 
 	// Add values from the umbrella declaration
 	for _, value := range b.Umbrella.Values {
@@ -57,20 +57,29 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, us
 		fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
 	}
 
-	// Add the release name
-	if release != "" {
-		fullcommand = append(fullcommand, release)
-	}
-
 	// Add a longer timeout
 	chunk := "--timeout 1800 --wait"
 	fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
+
+	// Add Tiller namespace
+	chunk = fmt.Sprintf("--tiller-namespace %s", tillerNamespace)
+	fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
+
+	// Add tls flag
+	if tls {
+		fullcommand = append(fullcommand, "--tls")
+	}
 
 	// Add the umbrella path
 	fullcommand = append(fullcommand, b.Umbrella.Path)
 
 	if useSecrets {
 		fullcommand = append([]string{"secrets"}, fullcommand...)
+	}
+
+	// Add the release name
+	if release != "" {
+		fullcommand = append(fullcommand, release)
 	}
 
 	cmd := exec.Command("helm", fullcommand...)

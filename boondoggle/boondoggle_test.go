@@ -17,6 +17,8 @@ type TestSet struct {
 	Namespace         string
 	Release           string
 	UseSecrets        bool
+	TLS               bool
+	TillerNamespace   string
 	ExpectInResult    []string
 	NotExpectInResult []string
 }
@@ -82,6 +84,27 @@ var tests = []TestSet{
 			"--set alias-service2.boondoggleCacheBust",
 		},
 	},
+	{
+		TestName:  "Test TLS",
+		Namespace: "mynamespace",
+		Release:   "prodrelease",
+		TLS:       true,
+		ExpectInResult: []string{
+			"--tls",
+		},
+	},
+	{
+		TestName:        "Test Tiller Namespace",
+		Namespace:       "mynamespace",
+		Release:         "prodrelease",
+		TillerNamespace: "tiller-namespace",
+		ExpectInResult: []string{
+			"--tiller-namespace tiller-namespace",
+		},
+		NotExpectInResult: []string{
+			"--tls",
+		},
+	},
 }
 
 func TestUpgradeCommandBuilder(t *testing.T) {
@@ -93,7 +116,7 @@ func TestUpgradeCommandBuilder(t *testing.T) {
 	viper.Unmarshal(&config)
 	for _, value := range tests {
 		b := NewBoondoggle(config, value.Environment, value.SetStateAll, value.ServiceState, value.ExtraEnv)
-		out, _ := b.DoUpgrade(value.Namespace, value.Release, true, value.UseSecrets)
+		out, _ := b.DoUpgrade(value.Namespace, value.Release, true, value.UseSecrets, value.TLS, value.TillerNamespace)
 		for _, expected := range value.ExpectInResult {
 			if strings.Contains(string(out), expected) == false {
 				t.Error(
