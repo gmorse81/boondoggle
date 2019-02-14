@@ -105,6 +105,15 @@ var tests = []TestSet{
 			"--tls",
 		},
 	},
+	{
+		TestName:        "Test No Tiller Namespace",
+		Namespace:       "mynamespace",
+		Release:         "prodrelease",
+		TillerNamespace: "kube-system",
+		NotExpectInResult: []string{
+			"--tiller-namespace",
+		},
+	},
 }
 
 func TestUpgradeCommandBuilder(t *testing.T) {

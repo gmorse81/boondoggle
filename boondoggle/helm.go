@@ -70,8 +70,10 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, us
 	fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
 
 	// Add Tiller namespace
-	chunk = fmt.Sprintf("--tiller-namespace %s", tillerNamespace)
-	fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
+	if tillerNamespace != "kube-system" {
+		chunk = fmt.Sprintf("--tiller-namespace %s", tillerNamespace)
+		fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
+	}
 
 	// Add tls flag
 	if tls {
