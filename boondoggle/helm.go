@@ -38,14 +38,14 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, us
 
 	// Add values from the umbrella declaration
 	for _, value := range b.Umbrella.Values {
-		chunk := fmt.Sprintf("--set %s", value)
+		chunk := fmt.Sprintf("--set-string %s", value)
 		fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
 	}
 
 	// Add values from each service, append the service's chart name(or alias if supplied)
 	for _, service := range b.Services {
 		for _, servicevalue := range service.HelmValues {
-			chunk := fmt.Sprintf("--set %s.%s", service.GetHelmDepName(), servicevalue)
+			chunk := fmt.Sprintf("--set-string %s.%s", service.GetHelmDepName(), servicevalue)
 			fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
 		}
 	}
