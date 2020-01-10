@@ -54,7 +54,7 @@ var tests = []TestSet{
 		Release:    "testrelease",
 		UseSecrets: false,
 		ExpectInResult: []string{
-			"--set alias-service2.localdev=true",
+			"--set-string alias-service2.localdev=true",
 		},
 	},
 	{
@@ -78,7 +78,7 @@ var tests = []TestSet{
 		},
 		UseSecrets: false,
 		ExpectInResult: []string{
-			"--set global.myglobalvalue=bar",
+			"--set-string global.myglobalvalue=bar",
 		},
 		NotExpectInResult: []string{
 			"--set alias-service2.boondoggleCacheBust",
