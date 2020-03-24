@@ -10,6 +10,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+var fastReq bool
+
 // requirementsBuildCmd represents the requirementsBuild command
 var requirementsBuildCmd = &cobra.Command{
 	Use:   "requirements-build",
@@ -35,22 +37,24 @@ No deployment or container builds will occur.`,
 			return err
 		}
 
-		// Add any helm repos that are not already added.
-		err = b.AddHelmRepos()
-		if err != nil {
-			return err
-		}
+		if !fastReq {
+			// Add any helm repos that are not already added.
+			err = b.AddHelmRepos()
+			if err != nil {
+				return err
+			}
 
-		// Clone any projects that need to be cloned.
-		err = b.DoClone()
-		if err != nil {
-			return err
-		}
+			// Clone any projects that need to be cloned.
+			err = b.DoClone()
+			if err != nil {
+				return err
+			}
 
-		// Run helm dep up
-		err = b.DepUp()
-		if err != nil {
-			return err
+			// Run helm dep up
+			err = b.DepUp()
+			if err != nil {
+				return err
+			}
 		}
 
 		return nil
@@ -58,5 +62,8 @@ No deployment or container builds will occur.`,
 }
 
 func init() {
+	requirementsBuildCmd.Flags().BoolVar(&fastReq, "fast", false, "Build the requirements file, but do not download the dependencies")
+	viper.BindPFlag("fast", requirementsBuildCmd.Flags().Lookup("fast"))
+
 	rootCmd.AddCommand(requirementsBuildCmd)
 }
