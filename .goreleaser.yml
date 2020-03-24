@@ -8,15 +8,16 @@ builds:
     env:
       - CGO_ENABLED=0
 
-brew:
-  name: boondoggle
-  homepage: "https://github.com/gmorse81/boondoggle"
-  github:
-    owner: gmorse81
-    name: homebrew-boondoggle
-  commit_author:
-    name: gmorse81
-    email: gmorse81@gmail.com
+brews:
+  -
+    name: boondoggle
+    homepage: "https://github.com/gmorse81/boondoggle"
+    github:
+      owner: gmorse81
+      name: homebrew-boondoggle
+    commit_author:
+      name: gmorse81
+      email: gmorse81@gmail.com
 
 archives:
   -
