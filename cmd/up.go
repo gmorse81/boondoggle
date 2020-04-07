@@ -16,6 +16,7 @@ var namespace string
 var release string
 var tillerNamespace string
 var tls bool
+var skipDepUp bool
 
 // upCmd represents the up command
 var upCmd = &cobra.Command{
@@ -72,10 +73,12 @@ var upCmd = &cobra.Command{
 			}
 		}
 
-		// Run helm dep up
-		err = b.DepUp()
-		if err != nil {
-			return err
+		if !skipDepUp {
+			// Run helm dep up
+			err = b.DepUp()
+			if err != nil {
+				return err
+			}
 		}
 
 		// Run the helm upgrade --install command
@@ -113,6 +116,9 @@ func init() {
 
 	upCmd.Flags().BoolVar(&tls, "tls", false, "Use TLS with tiller - requires key and certs in your helm home dir")
 	viper.BindPFlag("tls", upCmd.Flags().Lookup("tls"))
+
+	upCmd.Flags().BoolVar(&skipDepUp, "fast", false, "Recklessly skip downloading dependencies. Faster, but you may end up installing out-of-date dependencies")
+	viper.BindPFlag("fast", upCmd.Flags().Lookup("fast"))
 
 	rootCmd.AddCommand(upCmd)
 }
