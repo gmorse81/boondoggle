@@ -1,13 +1,13 @@
 [![Build Status](https://cloud.drone.io/api/badges/gmorse81/boondoggle/status.svg)](https://cloud.drone.io/gmorse81/boondoggle)
 # Boondoggle
 
-Boondoggle is a helm umbrella chart preprocessor, a dependency state management tool as well as a local development tool.
+Boondoggle is a helm umbrella chart preprocessor and a dependency state management tool as well as a local development tool.
 
 ## What is an umbrella chart?
 
-If you are unfamiliar with the concept of an umbrella chart, please see [this page](https://helm.sh/docs/howto/charts_tips_and_tricks/#complex-charts-with-many-dependencies)
+If you are unfamiliar with the concept of an umbrella chart, please see [the helm recommendation for managing complex charts](https://helm.sh/docs/howto/charts_tips_and_tricks/#complex-charts-with-many-dependencies)
 
-tldr; An umbrella chart is a helm chart that simply ties together a number of other charts as dependencies.
+tldr; An umbrella chart is a helm chart that ties together a number of other charts as dependencies.
 
 ## What problem is being solved?
 
@@ -15,11 +15,13 @@ If all of the subcharts in your umbrella are from public sources and are not wri
 
 The problem is that dependencies defined by an umbrella chart are generally pulled from a chart repository when being run in production or QA, but for local development, they need to be run locally. You can edit the requirements of the umbrella to do this, but then you take the risk of having that code committed to your project and having something fail.
 
-Boondoggle solves this by defining the different environments and states of dependencies that are running in the umbrella chart. It solves the boondoggle of state management for local dev (hence the name). Beyond managing the requirments.yaml file of the helm chart, it also supports the ability to run a dependency locally by cloning it from github, building the container image and specifying files and values to the helm command that installs the deployment locally.
+## How does it solve the problem?
+
+Boondoggle solves this by defining the different environments and with their dependencies and states as defined in the umbrella chart.  it does this by dynamically generating the umbrella project requirements.yaml. Beyond managing the requirments.yaml file of the helm chart, it also supports the ability to run a dependency locally by cloning it from github, building the container image and specifying files and values to the helm command that installs the deployment locally.  It solves the boondoggle of state management for local dev (hence the name).
 
 ## How does it work?
 
-Boondoggle defines a boondoggle.yml file that contains the configuration for the different environments and states of its subcharts. it also accepts flags to specify the state and environment.
+Boondoggle defines a boondoggle.yml file that contains the configuration for the different environments and states of its subcharts. It also accepts flags to specify the state and environment.
 
 Here's an annotated boondoggle.yml file:
 
