@@ -5,7 +5,7 @@ Boondoggle is a helm umbrella chart preprocessor, a dependency state management 
 
 ## What is an umbrella chart?
 
-If you are unfamiliar with the concept of an umbrella chart, please see [this page](https://github.com/kubernetes/helm/blob/master/docs/charts_tips_and_tricks.md#complex-charts-with-many-dependencies)
+If you are unfamiliar with the concept of an umbrella chart, please see [this page](https://helm.sh/docs/howto/charts_tips_and_tricks/#complex-charts-with-many-dependencies)
 
 tldr; An umbrella chart is a helm chart that simply ties together a number of other charts as dependencies.
 
