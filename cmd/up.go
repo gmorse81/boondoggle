@@ -8,7 +8,8 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"github.com/gmorse81/boondoggle/boondoggle"
+	"boondoggle/boondoggle"
+
 	"github.com/spf13/cobra"
 )
 

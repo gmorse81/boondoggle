@@ -12,7 +12,6 @@ WORKDIR /
 RUN curl -L "https://storage.googleapis.com/kubernetes-helm/${FILENAME}" | tar zxv -C /tmp
 
 FROM golang:1.11 as gobuild
-WORKDIR "$GOPATH/src/github.com/gmorse81/boondoggle"
 COPY --from=helmbuild /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /boondoggle
