@@ -10,7 +10,7 @@ steps:
   - name: unit_test
     image: golang:1.11
     commands:
-      - go test -v ./...
+      - go test -mod=vendor -v ./...
     when:
       event: [ pull_request, tag ]
 

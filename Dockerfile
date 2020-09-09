@@ -14,7 +14,7 @@ RUN curl -L "https://storage.googleapis.com/kubernetes-helm/${FILENAME}" | tar z
 FROM golang:1.11 as gobuild
 COPY --from=helmbuild /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /boondoggle
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -mod=vendor -o /boondoggle
 
 # The image we keep
 FROM google/cloud-sdk:alpine
