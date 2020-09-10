@@ -35,6 +35,7 @@ umbrella:
         - "prod.yml"
       values:
         - "global.myglobalvalue=${FOO}"
+        - "global.withCommas=${WITHCOMMAS}"
 
 services:
   - name: Service1

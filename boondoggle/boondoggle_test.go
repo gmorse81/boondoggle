@@ -74,11 +74,13 @@ var tests = []TestSet{
 		Namespace: "mynamespace",
 		Release:   "prodrelease",
 		ExtraEnv: map[string]string{
-			"FOO": "bar",
+			"FOO":        "bar",
+			"WITHCOMMAS": "stuff/, stuff2",
 		},
 		UseSecrets: false,
 		ExpectInResult: []string{
 			"--set-string global.myglobalvalue=bar",
+			"--set-string global.withCommas=stuff/, stuff2",
 		},
 		NotExpectInResult: []string{
 			"--set alias-service2.boondoggleCacheBust",

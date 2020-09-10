@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/gmorse81/boondoggle/boondoggle"
+	"boondoggle/boondoggle"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
