@@ -2,11 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
 
 	"github.com/spf13/viper"
-
-	"gopkg.in/yaml.v2"
 
 	"boondoggle/boondoggle"
 
@@ -33,13 +30,11 @@ var upCmd = &cobra.Command{
 		viper.Unmarshal(&config)
 		b := boondoggle.NewBoondoggle(config, viper.GetString("environment"), viper.GetString("set-state-all"), viper.GetStringSlice("service-state"), map[string]string{})
 
-		//Build requirements.yml
+		// Build Requirements struct
 		r := boondoggle.BuildRequirements(b, viper.GetStringSlice("state-v-override"))
 
-		// Write the new requirements.yml
-		out, err := yaml.Marshal(r)
-		path := fmt.Sprintf("%s/requirements.yaml", b.Umbrella.Path)
-		ioutil.WriteFile(path, out, 0644)
+		// Write the new requirements.yml or chart.yaml
+		err := boondoggle.WriteRequirements(r, b)
 		if err != nil {
 			return err
 		}
@@ -52,12 +47,6 @@ var upCmd = &cobra.Command{
 
 		// Add the imagePullSecrets using kubectl
 		err = b.AddImagePullSecret(viper.GetString("namespace"))
-		if err != nil {
-			return err
-		}
-
-		// Clone any projects that need to be cloned.
-		err = b.DoClone()
 		if err != nil {
 			return err
 		}
@@ -83,7 +72,7 @@ var upCmd = &cobra.Command{
 		}
 
 		// Run the helm upgrade --install command
-		out, err = b.DoUpgrade(viper.GetString("namespace"), viper.GetString("release"), viper.GetBool("dry-run"), viper.GetBool("helm-secrets"), viper.GetBool("tls"), viper.GetString("tiller-namespace"))
+		out, err := b.DoUpgrade(viper.GetString("namespace"), viper.GetString("release"), viper.GetBool("dry-run"), viper.GetBool("helm-secrets"), viper.GetBool("tls"), viper.GetString("tiller-namespace"))
 		if err != nil {
 			return fmt.Errorf("Helm upgrade command reported error: %s", string(out))
 		}

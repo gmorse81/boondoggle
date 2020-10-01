@@ -1,14 +1,10 @@
 package cmd
 
 import (
-	"fmt"
-	"io/ioutil"
-
 	"boondoggle/boondoggle"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
 )
 
 var fastReq bool
@@ -31,9 +27,7 @@ No deployment or container builds will occur.`,
 		r := boondoggle.BuildRequirements(b, viper.GetStringSlice("state-v-override"))
 
 		// Write the new requirements.yml
-		out, err := yaml.Marshal(r)
-		path := fmt.Sprintf("%s/requirements.yaml", b.Umbrella.Path)
-		ioutil.WriteFile(path, out, 0644)
+		err := boondoggle.WriteRequirements(r, b)
 		if err != nil {
 			return err
 		}
@@ -41,12 +35,6 @@ No deployment or container builds will occur.`,
 		if !fastReq {
 			// Add any helm repos that are not already added.
 			err = b.AddHelmRepos()
-			if err != nil {
-				return err
-			}
-
-			// Clone any projects that need to be cloned.
-			err = b.DoClone()
 			if err != nil {
 				return err
 			}

@@ -9,6 +9,7 @@ import (
 
 // RawBoondoggle is the struct representation of the boondoggle.yml config file.
 type RawBoondoggle struct {
+	HelmVersion     int    `mapstructure:"helmVersion,omitempty"`
 	PullSecretsName string `mapstructure:"pull-secrets-name,omitempty"`
 	DockerUsername  string `mapstructure:"docker_username,omitempty"`
 	DockerPassword  string `mapstructure:"docker_password,omitempty"`
@@ -75,6 +76,7 @@ type Boondoggle struct {
 	DockerUsername  string
 	DockerPassword  string
 	DockerEmail     string
+	HelmVersion     int
 	HelmRepos       []HelmRepo
 	Umbrella        Umbrella
 	Services        []Service
@@ -150,6 +152,11 @@ func (b *Boondoggle) configureTopLevel(r RawBoondoggle) {
 	b.DockerEmail = b.escapableEnvVarReplace(r.DockerEmail)
 	b.DockerPassword = b.escapableEnvVarReplace(r.DockerPassword)
 	b.DockerUsername = b.escapableEnvVarReplace(r.DockerUsername)
+	if r.HelmVersion == 0 {
+		b.HelmVersion = 2
+	} else {
+		b.HelmVersion = r.HelmVersion
+	}
 	for _, helmrepo := range r.HelmRepos {
 		var repoDetails = HelmRepo{
 			Name:            helmrepo.Name,

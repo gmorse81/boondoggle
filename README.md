@@ -31,6 +31,8 @@ Here's an annotated boondoggle.yml file:
 #
 # eg kubectl create secret docker-registry dockerregcreds
 pull-secrets-name: dockerregcreds
+# Specify 2 or 3 (default is 2) so boondoggle knows which version of helm command syntax to use.
+helmVersion: 3
 # when specified, boondoggle will add the following helm chart repos. if promptbasicauth is true, 
 # it will ask for a username and password.
 helm-repos:
@@ -78,9 +80,7 @@ services:
     # Specify the path to this dependency relative to the boondoggle.yml file. This will be 
     # used to clone the project if specified.
     path: source-projects/my-dependency
-    # If specified, and the "state" selected below has its repository set as "localdev", 
-    # boondoggle will clone this project to the path above.
-    # It will only do this if the directory doesn't already exist.
+    # git repo of chart for reference
     gitrepo: git@github.com:my-account/my-dependency.git
     # The alias of the dependency as to be used in requirements.yaml
     alias: awesome-chart
