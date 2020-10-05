@@ -65,18 +65,32 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, us
 	}
 
 	// Add a longer timeout
-	chunk := "--timeout 1800 --wait"
-	fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
-
-	// Add Tiller namespace
-	if tillerNamespace != "kube-system" {
-		chunk = fmt.Sprintf("--tiller-namespace %s", tillerNamespace)
+	if b.is2() {
+		chunk := "--timeout 1800 --wait"
+		fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
+	} else {
+		chunk := "--timeout 1800s --wait"
 		fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
 	}
 
+	// Add additional helm flags
+	for _, val := range b.Umbrella.AddtlHelmFlags {
+		fullcommand = append(fullcommand, val)
+	}
+
+	// Add Tiller namespace
+	if b.is2() {
+		if tillerNamespace != "kube-system" {
+			chunk := fmt.Sprintf("--tiller-namespace %s", tillerNamespace)
+			fullcommand = append(fullcommand, strings.Split(chunk, " ")...)
+		}
+	}
+
 	// Add tls flag
-	if tls {
-		fullcommand = append(fullcommand, "--tls")
+	if b.is2() {
+		if tls {
+			fullcommand = append(fullcommand, "--tls")
+		}
 	}
 
 	if useSecrets {
@@ -200,4 +214,11 @@ func (b *Boondoggle) SelfFetch(path string, version string) error {
 		return fmt.Errorf("error with self fetch: %s", string(out))
 	}
 	return nil
+}
+
+func (b Boondoggle) is2() bool {
+	if b.HelmVersion == 2 {
+		return true
+	}
+	return false
 }
