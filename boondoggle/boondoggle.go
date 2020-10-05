@@ -26,9 +26,10 @@ type RawBoondoggle struct {
 		Repository   string `mapstructure:"repository"`
 		Path         string `mapstructure:"path"`
 		Environments []struct {
-			Name   string   `mapstructure:"name"`
-			Files  []string `mapstructure:"files,omitempty"`
-			Values []string `mapstructure:"values,omitempty"`
+			Name           string   `mapstructure:"name"`
+			Files          []string `mapstructure:"files,omitempty"`
+			Values         []string `mapstructure:"values,omitempty"`
+			AddtlHelmFlags []string `mapstructure:"addtlHelmFlags,omitempty"`
 		} `mapstructure:"environments"`
 	} `mapstructure:"umbrella"`
 	Services []struct {
@@ -94,11 +95,12 @@ type HelmRepo struct {
 
 // Umbrella is the definition of a Helm Umbrella chart. Part of Boondoggle struct.
 type Umbrella struct {
-	Name       string
-	Path       string
-	Repository string
-	Files      []string
-	Values     []string
+	Name           string
+	Path           string
+	Repository     string
+	Files          []string
+	Values         []string
+	AddtlHelmFlags []string
 }
 
 // Step contains instructions for a pre, post or post exec build step for local.
@@ -191,6 +193,7 @@ func (b *Boondoggle) configureUmbrella(r RawBoondoggle, environment string) {
 		b.Umbrella.Repository = r.Umbrella.Repository
 		b.Umbrella.Values = b.escapableEnvVarReplaceSlice(r.Umbrella.Environments[umbrellaEnvKey].Values)
 		b.Umbrella.Files = r.Umbrella.Environments[umbrellaEnvKey].Files
+		b.Umbrella.AddtlHelmFlags = r.Umbrella.Environments[umbrellaEnvKey].AddtlHelmFlags
 	}
 }
 
