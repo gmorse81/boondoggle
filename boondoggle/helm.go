@@ -130,11 +130,8 @@ It will not do anything if the repo is already added.
 */
 func (b *Boondoggle) AddHelmRepos() error {
 	cmd := exec.Command("helm", "repo", "list")
-	out, err := cmd.CombinedOutput()
+	out, _ := cmd.CombinedOutput()
 	fmt.Println("Adding helm repos...")
-	if err != nil {
-		return fmt.Errorf("error in boondoggle fetching the existing helm chart repos: %s", err)
-	}
 	for _, repo := range b.HelmRepos {
 		// Not the best implementation, but helm does not have a json output for helm repo list.
 		// If the output of "helm repo list" does not contain the repo name(by basic string search), add it.
