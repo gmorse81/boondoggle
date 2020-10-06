@@ -12,13 +12,9 @@ import (
 func (b *Boondoggle) AddImagePullSecret(namespace string) error {
 	if b.PullSecretsName != "" { // if boondoggle config specifies a pullsecretsname
 
-		// Create the namespace in the cluster if there is one provided
-		if namespace != "" {
-			namespaceCommand := exec.Command("kubectl", "create", "namespace", namespace)
-			out, err := namespaceCommand.CombinedOutput()
-			if err != nil && !strings.Contains(string(out), "Error from server (AlreadyExists)") {
-				fmt.Println(string(out))
-			}
+		err := CreateNamespaceIfNotExists(namespace)
+		if err != nil {
+			fmt.Println(err.Error())
 		}
 
 		// Determine if it's already set up.
@@ -34,6 +30,7 @@ func (b *Boondoggle) AddImagePullSecret(namespace string) error {
 
 		cmd := exec.Command("kubectl", inslice...)
 		out, err := cmd.CombinedOutput()
+
 		if err != nil && strings.Contains(string(out), "NotFound") {
 			// if there was an error and the output of the command contains "NotFound", setup the credentials
 
@@ -91,6 +88,28 @@ func (b *Boondoggle) AddImagePullSecret(namespace string) error {
 			return fmt.Errorf("error with kubectl get: %s", err)
 		}
 		// Otherwise it already exists and we do nothing.
+	}
+	return nil
+}
+
+// CreateNamespaceIfNotExists creates a kubernetes namespace if it does not already exist in the cluster.
+func CreateNamespaceIfNotExists(namespace string) error {
+	// Create the namespace in the cluster if there is one provided
+	if namespace != "" {
+		// check if namespace exists
+		checkNamespace := exec.Command("kubectl", "get", "namespace", namespace)
+		out, err := checkNamespace.CombinedOutput()
+		if err != nil && strings.Contains(string(out), "not found") {
+			// if does not exist, create it
+			namespaceCommand := exec.Command("kubectl", "create", "namespace", namespace)
+			_, err := namespaceCommand.CombinedOutput()
+			if err != nil {
+				return fmt.Errorf("WARN: non-existent namespace could not be created")
+			}
+			fmt.Println("Namespace " + namespace + " created")
+		} else {
+			fmt.Println("Namespace " + namespace + " already exists. skipping.")
+		}
 	}
 	return nil
 }
