@@ -53,6 +53,11 @@ steps:
 
   - name: Docker Build DryRun
     image: plugins/docker
+    environment:
+      DOCKER_USERNAME:
+        from_secret: docker_username
+      DOCKER_PASSWORD:
+        from_secret: docker_password
     settings:
       auto_tag: true
       repo: gmorse81/boondoggle
@@ -77,6 +82,6 @@ steps:
   #     status: [ success ]
 ---
 kind: signature
-hmac: 9389b67b228d226d35cb669996a1ffa6b889e2c06f6d36c246c674f8684beb05
+hmac: caac51488b1e14f486e140dd33e5956b7f134d511e9f701e82ce7a0fd74e077c
 
 ...
