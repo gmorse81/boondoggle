@@ -1,3 +1,4 @@
+---
 kind: pipeline
 name: default
 
@@ -53,3 +54,8 @@ steps:
   #   when:
   #     event: [ tag ]
   #     status: [ success ]
+---
+kind: signature
+hmac: 4912053959edf4d05a73aa929ed728991c19b76ec12215f1871c49b36fed254b
+
+...
