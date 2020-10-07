@@ -15,7 +15,7 @@ steps:
     when:
       event: [ pull_request, tag ]
 
-  - name: homebrew_build
+  - name: Goreleaser Build
     image: golang:1.11
     environment:
       GITHUB_TOKEN:
@@ -26,7 +26,7 @@ steps:
       event: [ tag ]
       status: [ success ]
 
-  - name: docker_build
+  - name: Docker Build
     image: plugins/docker
     environment:
       DOCKER_USERNAME:
@@ -38,6 +38,27 @@ steps:
       repo: gmorse81/boondoggle
     when:
       event: [ tag ]
+      status: [ success ]
+
+  - name: Goreleaser Build DryRun
+    image: golang:1.11
+    environment:
+      GITHUB_TOKEN:
+        from_secret: github_token
+    commands:
+      - curl -sL https://git.io/goreleaser | bash -s -- build
+    when:
+      event: [ pull_request ]
+      status: [ success ]
+
+  - name: Docker Build DryRun
+    image: plugins/docker
+    settings:
+      auto_tag: true
+      repo: gmorse81/boondoggle
+      dry_run: true
+    when:
+      event: [ pull_request ]
       status: [ success ]
 
   # - name: docker_build_latest
@@ -56,6 +77,6 @@ steps:
   #     status: [ success ]
 ---
 kind: signature
-hmac: 4912053959edf4d05a73aa929ed728991c19b76ec12215f1871c49b36fed254b
+hmac: 85233c37cad952e62dd7724b09a29d200b89685e918d2b7cda2f5866a832996c
 
 ...
