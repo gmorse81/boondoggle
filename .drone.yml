@@ -59,9 +59,9 @@ steps:
       DOCKER_PASSWORD:
         from_secret: docker_password
     settings:
-      auto_tag: true
       repo: gmorse81/boondoggle
-      dry_run: true
+      tags:
+        - dev
     when:
       event: [ pull_request ]
       status: [ success ]
@@ -82,6 +82,6 @@ steps:
   #     status: [ success ]
 ---
 kind: signature
-hmac: caac51488b1e14f486e140dd33e5956b7f134d511e9f701e82ce7a0fd74e077c
+hmac: 1b64c64dee399727985efcba180fc07cd705da280b4e71ab06188db3a7dca2e2
 
 ...
