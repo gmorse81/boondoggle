@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/gmorse81/boondoggle/boondoggle"
+	"github.com/gmorse81/boondoggle/v3/boondoggle"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
