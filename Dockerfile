@@ -9,7 +9,7 @@ tar
 ARG VERSION=v3.3.1
 ARG FILENAME=helm-${VERSION}-linux-amd64.tar.gz
 WORKDIR /
-RUN curl -L "https://storage.googleapis.com/kubernetes-helm/${FILENAME}" | tar zxv -C /tmp
+RUN curl -L "https://get.helm.sh/${FILENAME}" | tar zxv -C /tmp
 
 FROM golang:1.14 as gobuild
 WORKDIR /boondogglefiles
