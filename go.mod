@@ -1,4 +1,4 @@
-module boondoggle
+module github.com/gmorse81/boondoggle
 
 go 1.14
 

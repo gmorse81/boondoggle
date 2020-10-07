@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/viper"
 
-	"boondoggle/boondoggle"
+	"github.com/gmorse81/boondoggle/boondoggle"
 
 	"github.com/spf13/cobra"
 )
