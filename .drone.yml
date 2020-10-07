@@ -9,14 +9,14 @@ steps:
       - git fetch --tags
 
   - name: unit_test
-    image: golang:1.11
+    image: golang:1.14
     commands:
       - go test -mod=vendor -v ./...
     when:
       event: [ pull_request, tag ]
 
   - name: Goreleaser Build
-    image: golang:1.11
+    image: golang:1.14
     environment:
       GITHUB_TOKEN:
         from_secret: github_token
@@ -41,12 +41,12 @@ steps:
       status: [ success ]
 
   - name: Goreleaser Build DryRun
-    image: golang:1.11
+    image: golang:1.14
     environment:
       GITHUB_TOKEN:
         from_secret: github_token
     commands:
-      - curl -sL https://git.io/goreleaser | bash -s -- build
+      - curl -sL https://git.io/goreleaser | bash -s -- build --skip-validate
     when:
       event: [ pull_request ]
       status: [ success ]
@@ -77,6 +77,6 @@ steps:
   #     status: [ success ]
 ---
 kind: signature
-hmac: 85233c37cad952e62dd7724b09a29d200b89685e918d2b7cda2f5866a832996c
+hmac: 9389b67b228d226d35cb669996a1ffa6b889e2c06f6d36c246c674f8684beb05
 
 ...
