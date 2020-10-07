@@ -62,6 +62,7 @@ steps:
       repo: gmorse81/boondoggle
       tags:
         - dev
+      dry_run: true
     when:
       event: [ pull_request ]
       status: [ success ]
@@ -82,6 +83,6 @@ steps:
   #     status: [ success ]
 ---
 kind: signature
-hmac: 1b64c64dee399727985efcba180fc07cd705da280b4e71ab06188db3a7dca2e2
+hmac: 143eb058228afbb0460f6d8dd1069463e540c7a87fdb24674a96198948e09f5b
 
 ...
