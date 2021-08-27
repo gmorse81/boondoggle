@@ -14,7 +14,7 @@ import (
 //This file contains the helm commands run by boondoggle using values from Boondoggle
 
 // DoUpgrade builds and runs the helm upgrade --install command.
-func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, useSecrets bool, tls bool, tillerNamespace string) ([]byte, error) {
+func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, useSecrets bool, tls bool, tillerNamespace string, verbose bool) ([]byte, error) {
 	fullcommand := []string{"upgrade", "-i"}
 
 	// Add the release name
@@ -91,6 +91,10 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, us
 		if tls {
 			fullcommand = append(fullcommand, "--tls")
 		}
+	}
+
+	if verbose {
+		fullcommand = append(fullcommand, "--debug")
 	}
 
 	if useSecrets {
@@ -187,7 +191,9 @@ func (b *Boondoggle) AddHelmRepos() error {
 }
 
 func repoadd(name string, u *url.URL) error {
-	cmd := exec.Command("helm", "repo", "add", name, u.String())
+	fullcommand := []string{"repo", "add", name, u.String()};
+	if ()
+	cmd := exec.Command("helm", fullcommand...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("error adding a repo to the helm repository: %s", string(out))

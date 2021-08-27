@@ -163,6 +163,7 @@ here's the output from boondoggle up --help
     Global Flags:
         --config string                  config file (./boondoggle.yml)
     -d, --dry-run                        Dry run will do all steps except for the helm deploy. The helm command that would have been run will be printed.
+    -v, --verbose                        Verbose output.
     -e, --environment string             Selects the umbrella environment. Defaults to the environment with name: default in the boondoggle.yml file. (default "default")
     -s, --service-state stringSlice      Sets a services state eg. my-service=local. Defaults to the 'default' state.
     -a, --set-state-all string           Sets all services to the same state.

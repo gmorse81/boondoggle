@@ -23,6 +23,7 @@ var dryRun bool
 var setStateAll string
 var skipDocker bool
 var useSecrets bool
+var verbose bool
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -56,6 +57,9 @@ func init() {
 
 	rootCmd.PersistentFlags().BoolVarP(&skipDocker, "skip-docker", "k", false, "Skips the docker build step.")
 	viper.BindPFlag("skip-docker", rootCmd.PersistentFlags().Lookup("skip-docker"))
+
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "This flag will use the --debug flag on the helm commands.")
+	viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
 }
 
 // initConfig reads in config file and ENV variables if set.
