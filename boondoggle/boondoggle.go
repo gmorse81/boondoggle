@@ -71,6 +71,10 @@ type RawBoondoggle struct {
 	} `mapstructure:"services"`
 }
 
+type LogPrinter interface {
+	Print(...interface{})
+}
+
 // Boondoggle is the processed version of RawBoondoggle. It represents the settings of only the chosen options.
 type Boondoggle struct {
 	PullSecretsName string
@@ -82,6 +86,7 @@ type Boondoggle struct {
 	Umbrella        Umbrella
 	Services        []Service
 	ExtraEnv        map[string]string
+	L               LogPrinter
 }
 
 // HelmRepo is the data needed to add a Helm Repository. Part of Boondoggle struct.
@@ -132,9 +137,10 @@ type Service struct {
 }
 
 // NewBoondoggle unmarshals the boondoggle.yml to RawBoondoggle and returns a processed Boondoggle struct type.
-func NewBoondoggle(config RawBoondoggle, environment string, setStateAll string, serviceState []string, extraEnv map[string]string) Boondoggle {
+func NewBoondoggle(config RawBoondoggle, environment string, setStateAll string, serviceState []string, extraEnv map[string]string, logger LogPrinter) Boondoggle {
 	var boondoggle Boondoggle
 	boondoggle.ExtraEnv = extraEnv
+	boondoggle.L = logger
 	boondoggle.configureServices(config, setStateAll, serviceState)
 	boondoggle.configureUmbrella(config, environment)
 	boondoggle.configureTopLevel(config)

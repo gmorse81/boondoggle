@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/spf13/viper"
 
@@ -28,7 +30,7 @@ var upCmd = &cobra.Command{
 		// Get a NewBoondoggle built from config.
 		var config boondoggle.RawBoondoggle
 		viper.Unmarshal(&config)
-		b := boondoggle.NewBoondoggle(config, viper.GetString("environment"), viper.GetString("set-state-all"), viper.GetStringSlice("service-state"), map[string]string{})
+		b := boondoggle.NewBoondoggle(config, viper.GetString("environment"), viper.GetString("set-state-all"), viper.GetStringSlice("service-state"), map[string]string{}, log.New(os.Stdout, "", 0))
 
 		// Build Requirements struct
 		r := boondoggle.BuildRequirements(b, viper.GetStringSlice("state-v-override"))
