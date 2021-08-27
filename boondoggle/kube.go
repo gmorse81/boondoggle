@@ -12,9 +12,9 @@ import (
 func (b *Boondoggle) AddImagePullSecret(namespace string) error {
 	if b.PullSecretsName != "" { // if boondoggle config specifies a pullsecretsname
 
-		err := CreateNamespaceIfNotExists(namespace)
+		err := b.CreateNamespaceIfNotExists(namespace)
 		if err != nil {
-			fmt.Println(err.Error())
+			b.L.Print(err.Error())
 		}
 
 		// Determine if it's already set up.
@@ -80,7 +80,7 @@ func (b *Boondoggle) AddImagePullSecret(namespace string) error {
 
 			cmd := exec.Command("kubectl", inslice...)
 			out, err := cmd.CombinedOutput()
-			fmt.Println(string(out))
+			b.L.Print(string(out))
 			if err != nil {
 				return fmt.Errorf("error with kubectl create secret: %s", err)
 			}
@@ -93,7 +93,7 @@ func (b *Boondoggle) AddImagePullSecret(namespace string) error {
 }
 
 // CreateNamespaceIfNotExists creates a kubernetes namespace if it does not already exist in the cluster.
-func CreateNamespaceIfNotExists(namespace string) error {
+func (b *Boondoggle) CreateNamespaceIfNotExists(namespace string) error {
 	// Create the namespace in the cluster if there is one provided
 	if namespace != "" {
 		// check if namespace exists
@@ -106,9 +106,9 @@ func CreateNamespaceIfNotExists(namespace string) error {
 			if err != nil {
 				return fmt.Errorf("WARN: non-existent namespace could not be created")
 			}
-			fmt.Println("Namespace " + namespace + " created")
+			b.L.Print("Namespace " + namespace + " created")
 		} else {
-			fmt.Println("Namespace " + namespace + " already exists. skipping.")
+			b.L.Print("Namespace " + namespace + " already exists. skipping.")
 		}
 	}
 	return nil

@@ -191,7 +191,7 @@ func (b *Boondoggle) configureUmbrella(r RawBoondoggle, environment string) {
 
 	if err != nil {
 		// indicates there was not a match for the given environment
-		fmt.Print(err)
+		b.L.Print(err)
 	} else {
 		// build the environment in Boondoggle
 		b.Umbrella.Name = r.Umbrella.Name
@@ -237,7 +237,7 @@ func (b *Boondoggle) configureServices(r RawBoondoggle, setStateAll string, serv
 
 		if err != nil {
 			// indicates there was not a match for the given service and state-name
-			fmt.Print(err)
+			b.L.Print(err)
 		} else {
 			// build the service from the selected state
 			var completeService = Service{

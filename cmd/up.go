@@ -78,7 +78,7 @@ var upCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("Helm upgrade command reported error: %s", string(out))
 		}
-		fmt.Println(string(out))
+		b.L.Print(string(out))
 
 		if skipDocker != true {
 			err = b.DoPostDeploySteps()

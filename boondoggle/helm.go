@@ -101,7 +101,7 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, us
 
 	// Run the command
 	if dryRun == false {
-		fmt.Println("Installing the environment...")
+		b.L.Print("Installing the environment...")
 		out, err := cmd.CombinedOutput()
 		return out, err
 	}
@@ -114,7 +114,7 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, us
 func (b *Boondoggle) DepUp() error {
 	cmd := exec.Command("helm", "dep", "up", b.Umbrella.Path)
 	_, err := cmd.CombinedOutput()
-	fmt.Println("Updating dependencies...")
+	b.L.Print("Updating dependencies...")
 	if err != nil {
 		return fmt.Errorf("There was an error updating the dependencies on the umbrella: %s", err)
 	}
@@ -131,7 +131,7 @@ It will not do anything if the repo is already added.
 func (b *Boondoggle) AddHelmRepos() error {
 	cmd := exec.Command("helm", "repo", "list")
 	out, _ := cmd.CombinedOutput()
-	fmt.Println("Adding helm repos...")
+	b.L.Print("Adding helm repos...")
 	for _, repo := range b.HelmRepos {
 		// Not the best implementation, but helm does not have a json output for helm repo list.
 		// If the output of "helm repo list" does not contain the repo name(by basic string search), add it.
@@ -206,7 +206,7 @@ func (b *Boondoggle) SelfFetch(path string, version string) error {
 	}
 	cmd := exec.Command("helm", strings.Split(fetchcommand, " ")...)
 	out, err := cmd.CombinedOutput()
-	fmt.Println("Fetching the umbrella...")
+	b.L.Print("Fetching the umbrella...")
 	if err != nil {
 		return fmt.Errorf("error with self fetch: %s", string(out))
 	}
