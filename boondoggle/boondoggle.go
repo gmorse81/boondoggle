@@ -87,6 +87,7 @@ type Boondoggle struct {
 	Services        []Service
 	ExtraEnv        map[string]string
 	L               LogPrinter
+	Verbose         bool
 }
 
 // HelmRepo is the data needed to add a Helm Repository. Part of Boondoggle struct.
@@ -137,10 +138,11 @@ type Service struct {
 }
 
 // NewBoondoggle unmarshals the boondoggle.yml to RawBoondoggle and returns a processed Boondoggle struct type.
-func NewBoondoggle(config RawBoondoggle, environment string, setStateAll string, serviceState []string, extraEnv map[string]string, logger LogPrinter) Boondoggle {
+func NewBoondoggle(config RawBoondoggle, environment string, setStateAll string, serviceState []string, extraEnv map[string]string, logger LogPrinter, verbose bool) Boondoggle {
 	var boondoggle Boondoggle
 	boondoggle.ExtraEnv = extraEnv
 	boondoggle.L = logger
+	boondoggle.Verbose = verbose
 	boondoggle.configureServices(config, setStateAll, serviceState)
 	boondoggle.configureUmbrella(config, environment)
 	boondoggle.configureTopLevel(config)

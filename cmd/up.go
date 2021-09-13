@@ -30,7 +30,7 @@ var upCmd = &cobra.Command{
 		// Get a NewBoondoggle built from config.
 		var config boondoggle.RawBoondoggle
 		viper.Unmarshal(&config)
-		b := boondoggle.NewBoondoggle(config, viper.GetString("environment"), viper.GetString("set-state-all"), viper.GetStringSlice("service-state"), map[string]string{}, log.New(os.Stdout, "", 0))
+		b := boondoggle.NewBoondoggle(config, viper.GetString("environment"), viper.GetString("set-state-all"), viper.GetStringSlice("service-state"), map[string]string{}, log.New(os.Stdout, "", 0), viper.GetBool("verbose"))
 
 		// Build Requirements struct
 		r := boondoggle.BuildRequirements(b, viper.GetStringSlice("state-v-override"))
@@ -74,7 +74,7 @@ var upCmd = &cobra.Command{
 		}
 
 		// Run the helm upgrade --install command
-		out, err := b.DoUpgrade(viper.GetString("namespace"), viper.GetString("release"), viper.GetBool("dry-run"), viper.GetBool("helm-secrets"), viper.GetBool("tls"), viper.GetString("tiller-namespace"), viper.GetBool("verbose"))
+		out, err := b.DoUpgrade(viper.GetString("namespace"), viper.GetString("release"), viper.GetBool("dry-run"), viper.GetBool("helm-secrets"), viper.GetBool("tls"), viper.GetString("tiller-namespace"))
 		if err != nil {
 			return fmt.Errorf("Helm upgrade command reported error: %s", string(out))
 		}
