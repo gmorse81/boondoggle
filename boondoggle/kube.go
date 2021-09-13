@@ -81,7 +81,7 @@ func (b *Boondoggle) AddImagePullSecret(namespace string) error {
 			cmd := exec.Command("kubectl", inslice...)
 			out, err := cmd.CombinedOutput()
 			if b.Verbose {
-				b.L.Print("Command: " + cmd.String())
+				b.L.Print(Colorize(Cyan, "Command: "+cmd.String()))
 				b.L.Print(string(out))
 			}
 			if err != nil {
@@ -103,7 +103,7 @@ func (b *Boondoggle) CreateNamespaceIfNotExists(namespace string) error {
 		checkNamespace := exec.Command("kubectl", "get", "namespace", namespace)
 		out, err := checkNamespace.CombinedOutput()
 		if b.Verbose {
-			b.L.Print("Command: " + checkNamespace.String())
+			b.L.Print(Colorize(Cyan, "Command: "+checkNamespace.String()))
 			b.L.Print(string(out))
 		}
 		if err != nil && strings.Contains(string(out), "not found") {
@@ -114,7 +114,7 @@ func (b *Boondoggle) CreateNamespaceIfNotExists(namespace string) error {
 				return fmt.Errorf("WARN: non-existent namespace could not be created")
 			}
 			if b.Verbose {
-				b.L.Print("Command: " + namespaceCommand.String())
+				b.L.Print(Colorize(Cyan, "Command: "+namespaceCommand.String()))
 				b.L.Print(string(out))
 			}
 			b.L.Print("Namespace " + namespace + " created")

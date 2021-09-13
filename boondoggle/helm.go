@@ -106,7 +106,7 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, us
 		b.L.Print("Installing the environment...")
 		out, err := cmd.CombinedOutput()
 		if b.Verbose {
-			b.L.Print("Command: " + cmd.String())
+			b.L.Print(Colorize(Cyan, "Command: "+cmd.String()))
 			b.L.Print(string(out))
 		}
 		return out, err
@@ -125,7 +125,7 @@ func (b *Boondoggle) DepUp() error {
 		return fmt.Errorf("there was an error updating the dependencies on the umbrella: %s", err)
 	}
 	if b.Verbose {
-		b.L.Print("Command: " + cmd.String())
+		b.L.Print(Colorize(Cyan, "Command: "+cmd.String()))
 		b.L.Print(string(out))
 	}
 
@@ -143,7 +143,7 @@ func (b *Boondoggle) AddHelmRepos() error {
 	cmd := exec.Command("helm", "repo", "list")
 	out, _ := cmd.CombinedOutput()
 	if b.Verbose {
-		b.L.Print("Command: " + cmd.String())
+		b.L.Print(Colorize(Cyan, "Command: "+cmd.String()))
 		b.L.Print(string(out))
 	}
 	b.L.Print("Adding helm repos...")
@@ -212,7 +212,7 @@ func repoadd(name string, u *url.URL, verbose bool, logger LogPrinter) error {
 		return fmt.Errorf("error adding a repo to the helm repository: %s", string(out))
 	}
 	if verbose {
-		logger.Print("Command: " + cmd.String())
+		logger.Print(Colorize(Cyan, "Command: "+cmd.String()))
 		logger.Print(string(out))
 	}
 	return nil
@@ -231,7 +231,7 @@ func (b *Boondoggle) SelfFetch(path string, version string) error {
 	out, err := cmd.CombinedOutput()
 	b.L.Print("Fetching the umbrella...")
 	if b.Verbose {
-		b.L.Print("Command: " + cmd.String())
+		b.L.Print(Colorize(Cyan, "Command: "+cmd.String()))
 		b.L.Print(string(out))
 	}
 	if err != nil {
