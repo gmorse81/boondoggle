@@ -74,9 +74,7 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, us
 	}
 
 	// Add additional helm flags
-	for _, val := range b.Umbrella.AddtlHelmFlags {
-		fullcommand = append(fullcommand, val)
-	}
+	fullcommand = append(fullcommand, b.Umbrella.AddtlHelmFlags...)
 
 	// Add Tiller namespace
 	if b.is2() {
@@ -104,7 +102,7 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, us
 	cmd := exec.Command("helm", fullcommand...)
 
 	// Run the command
-	if dryRun == false {
+	if !dryRun {
 		b.L.Print("Installing the environment...")
 		out, err := cmd.CombinedOutput()
 		if b.Verbose {
@@ -124,7 +122,7 @@ func (b *Boondoggle) DepUp() error {
 	cmd := exec.Command("helm", "dep", "up", b.Umbrella.Path)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("There was an error updating the dependencies on the umbrella: %s", err)
+		return fmt.Errorf("there was an error updating the dependencies on the umbrella: %s", err)
 	}
 	if b.Verbose {
 		b.L.Print("Command: " + cmd.String())
@@ -152,8 +150,8 @@ func (b *Boondoggle) AddHelmRepos() error {
 	for _, repo := range b.HelmRepos {
 		// Not the best implementation, but helm does not have a json output for helm repo list.
 		// If the output of "helm repo list" does not contain the repo name(by basic string search), add it.
-		if strings.Contains(string(out), repo.Name) == false {
-			if repo.Promptbasicauth == true { //if the repo requires username and password, prompt for that.
+		if !strings.Contains(string(out), repo.Name) {
+			if repo.Promptbasicauth { //if the repo requires username and password, prompt for that.
 
 				// get the username either from user input or from boondoggle.yml
 				var username string
@@ -243,8 +241,5 @@ func (b *Boondoggle) SelfFetch(path string, version string) error {
 }
 
 func (b Boondoggle) is2() bool {
-	if b.HelmVersion == 2 {
-		return true
-	}
-	return false
+	return b.HelmVersion == 2
 }
