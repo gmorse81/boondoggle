@@ -128,7 +128,7 @@ func TestUpgradeCommandBuilder(t *testing.T) {
 	var config RawBoondoggle
 	viper.Unmarshal(&config)
 	for _, value := range tests {
-		b := NewBoondoggle(config, value.Environment, value.SetStateAll, value.ServiceState, value.ExtraEnv, log.New(os.Stdout, "", 0), false)
+		b := NewBoondoggle(config, value.Environment, value.SetStateAll, value.ServiceState, value.ExtraEnv, log.New(os.Stdout, "", 0), false, false)
 		out, _ := b.DoUpgrade(value.Namespace, value.Release, true, value.UseSecrets, value.TLS, value.TillerNamespace)
 		for _, expected := range value.ExpectInResult {
 			if strings.Contains(string(out), expected) == false {
