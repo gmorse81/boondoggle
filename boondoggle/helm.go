@@ -91,7 +91,7 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, us
 		}
 	}
 
-	if b.Verbose {
+	if b.SuperSecret {
 		fullcommand = append(fullcommand, "--debug")
 	}
 
@@ -107,7 +107,6 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, us
 		out, err := cmd.CombinedOutput()
 		if b.Verbose {
 			b.L.Print(Colorize(Cyan, "Command: "+cmd.String()))
-			b.L.Print(string(out))
 		}
 		return out, err
 	}

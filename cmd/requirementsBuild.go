@@ -24,7 +24,7 @@ No deployment or container builds will occur.`,
 		// Get a NewBoondoggle built from config.
 		var config boondoggle.RawBoondoggle
 		viper.Unmarshal(&config)
-		b := boondoggle.NewBoondoggle(config, viper.GetString("environment"), viper.GetString("set-state-all"), viper.GetStringSlice("service-state"), map[string]string{}, log.New(os.Stdout, "", 0), viper.GetBool("verbose"))
+		b := boondoggle.NewBoondoggle(config, viper.GetString("environment"), viper.GetString("set-state-all"), viper.GetStringSlice("service-state"), map[string]string{}, log.New(os.Stdout, "", 0), viper.GetBool("verbose"), viper.GetBool("supersecret"))
 
 		//Build requirements.yml
 		r := boondoggle.BuildRequirements(b, viper.GetStringSlice("state-v-override"))

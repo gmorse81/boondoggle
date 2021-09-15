@@ -16,14 +16,17 @@ var rootCmd = &cobra.Command{
 	Short: "Boondoggle is a helm umbrella chart preprocessor, a dependency state management tool as well as a local development tool.",
 }
 
-var serviceState []string
-var umbrellaEnv string
-var stateValueOverride []string
-var dryRun bool
-var setStateAll string
-var skipDocker bool
-var useSecrets bool
-var verbose bool
+var (
+	serviceState       []string
+	umbrellaEnv        string
+	stateValueOverride []string
+	dryRun             bool
+	setStateAll        string
+	skipDocker         bool
+	useSecrets         bool
+	verbose            bool
+	superSecret        bool
+)
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -58,8 +61,11 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&skipDocker, "skip-docker", "k", false, "Skips the docker build step.")
 	viper.BindPFlag("skip-docker", rootCmd.PersistentFlags().Lookup("skip-docker"))
 
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "This flag will use the --debug flag on the helm commands.")
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Shows the commands being used, and uses the --debug flag on most helm commands.")
 	viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
+
+	rootCmd.PersistentFlags().BoolVar(&superSecret, "supersecret", false, "This flag will use the --debug flag on all the helm commands. OUTPUTS EVERYTHING. SECRETS, PASSWORDS, CERTIFICATES WILL BE PRINTED TO THE SCREEN.")
+	viper.BindPFlag("supersecret", rootCmd.PersistentFlags().Lookup("supersecret"))
 }
 
 // initConfig reads in config file and ENV variables if set.
