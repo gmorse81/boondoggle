@@ -1,4 +1,4 @@
-[![Build Status](https://cloud.drone.io/api/badges/gmorse81/boondoggle/status.svg)](https://cloud.drone.io/gmorse81/boondoggle)
+[![Build Status](https://cloud.drone.io/api/badges/gmorse81/boondoggle/status.svg)](https://cloud.drone.io/gmorse81/boondoggle) 
 # Boondoggle
 
 Boondoggle is a helm umbrella chart preprocessor and a dependency state management tool as well as a local development tool.
@@ -163,6 +163,8 @@ here's the output from boondoggle up --help
     Global Flags:
         --config string                  config file (./boondoggle.yml)
     -d, --dry-run                        Dry run will do all steps except for the helm deploy. The helm command that would have been run will be printed.
+    -v, --verbose                        Verbose output.
+        --supersecret                    Will output EVERYTHING. Charts, secrets, keys, certificates. Everything.
     -e, --environment string             Selects the umbrella environment. Defaults to the environment with name: default in the boondoggle.yml file. (default "default")
     -s, --service-state stringSlice      Sets a services state eg. my-service=local. Defaults to the 'default' state.
     -a, --set-state-all string           Sets all services to the same state.

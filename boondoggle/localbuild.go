@@ -1,7 +1,6 @@
 package boondoggle
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -56,7 +55,7 @@ func (b *Boondoggle) DoPostDeploySteps() error {
 
 // DoPostDeployExec runs commands in the app outlined in the boondoggle.yml file for the services with the state set to "localdev"
 func (b *Boondoggle) DoPostDeployExec(namespace string) error {
-	fmt.Println("running post exec...")
+	b.L.Print("running post exec...")
 	for _, service := range b.Services {
 		if service.Repository == "localdev" && len(service.PostDeployExec) > 0 {
 			for _, step := range service.PostDeployExec {
@@ -75,7 +74,7 @@ func (b *Boondoggle) runExecCommand(namespace string, appName string, container 
 
 	// Get the pod name based on the namespace and the app= tag
 	cmd := exec.Command("kubectl", "get", "pods", "-n", namespace, "-o", "go-template", "--template", "{{(index .items 0).metadata.name}}", "--selector", "app="+appName)
-	fmt.Println(cmd.Args)
+	b.L.Print(cmd.Args)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return string(out), err
@@ -84,8 +83,8 @@ func (b *Boondoggle) runExecCommand(namespace string, appName string, container 
 	fragmentSlice := []string{"exec", "-n", namespace, "-c", container, string(out), "--"}
 	fragmentSlice = append(fragmentSlice, command...)
 	cmd = exec.Command("kubectl", fragmentSlice...)
-	fmt.Println(cmd.Args)
+	b.L.Print(cmd.Args)
 	out, err = cmd.CombinedOutput()
-	fmt.Println(string(out))
+	b.L.Print(string(out))
 	return string(out), err
 }

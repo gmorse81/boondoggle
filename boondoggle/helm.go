@@ -74,9 +74,7 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, us
 	}
 
 	// Add additional helm flags
-	for _, val := range b.Umbrella.AddtlHelmFlags {
-		fullcommand = append(fullcommand, val)
-	}
+	fullcommand = append(fullcommand, b.Umbrella.AddtlHelmFlags...)
 
 	// Add Tiller namespace
 	if b.is2() {
@@ -93,6 +91,10 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, us
 		}
 	}
 
+	if b.SuperSecret {
+		fullcommand = append(fullcommand, "--debug")
+	}
+
 	if useSecrets {
 		fullcommand = append([]string{"secrets"}, fullcommand...)
 	}
@@ -100,9 +102,12 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, us
 	cmd := exec.Command("helm", fullcommand...)
 
 	// Run the command
-	if dryRun == false {
-		fmt.Println("Installing the environment...")
+	if !dryRun {
+		b.L.Print("Installing the environment...")
 		out, err := cmd.CombinedOutput()
+		if b.Verbose {
+			b.L.Print(Colorize(Cyan, "Command: "+cmd.String()))
+		}
 		return out, err
 	}
 
@@ -112,12 +117,17 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, us
 
 //DepUp runs "helm dependency update".
 func (b *Boondoggle) DepUp() error {
+	b.L.Print("Updating dependencies...")
 	cmd := exec.Command("helm", "dep", "up", b.Umbrella.Path)
-	_, err := cmd.CombinedOutput()
-	fmt.Println("Updating dependencies...")
+	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("There was an error updating the dependencies on the umbrella: %s", err)
+		return fmt.Errorf("there was an error updating the dependencies on the umbrella: %s", err)
 	}
+	if b.Verbose {
+		b.L.Print(Colorize(Cyan, "Command: "+cmd.String()))
+		b.L.Print(string(out))
+	}
+
 	return nil
 }
 
@@ -131,12 +141,16 @@ It will not do anything if the repo is already added.
 func (b *Boondoggle) AddHelmRepos() error {
 	cmd := exec.Command("helm", "repo", "list")
 	out, _ := cmd.CombinedOutput()
-	fmt.Println("Adding helm repos...")
+	if b.Verbose {
+		b.L.Print(Colorize(Cyan, "Command: "+cmd.String()))
+		b.L.Print(string(out))
+	}
+	b.L.Print("Adding helm repos...")
 	for _, repo := range b.HelmRepos {
 		// Not the best implementation, but helm does not have a json output for helm repo list.
 		// If the output of "helm repo list" does not contain the repo name(by basic string search), add it.
-		if strings.Contains(string(out), repo.Name) == false {
-			if repo.Promptbasicauth == true { //if the repo requires username and password, prompt for that.
+		if !strings.Contains(string(out), repo.Name) {
+			if repo.Promptbasicauth { //if the repo requires username and password, prompt for that.
 
 				// get the username either from user input or from boondoggle.yml
 				var username string
@@ -170,13 +184,13 @@ func (b *Boondoggle) AddHelmRepos() error {
 
 				//Add the basic auth username and password to the URL.
 				u.User = url.UserPassword(username, password)
-				repoadd(repo.Name, u)
+				repoadd(repo.Name, u, b.Verbose, b.L)
 			} else { // else, add without the prompt for username and password.
 				u, err := url.Parse(repo.URL)
 				if err != nil {
 					return fmt.Errorf("error parsing the url of the chart repo: %s", err)
 				}
-				err = repoadd(repo.Name, u)
+				err = repoadd(repo.Name, u, b.Verbose, b.L)
 				if err != nil {
 					return fmt.Errorf("error when trying to add a chart repo to helm registry: %s", err)
 				}
@@ -186,11 +200,19 @@ func (b *Boondoggle) AddHelmRepos() error {
 	return nil
 }
 
-func repoadd(name string, u *url.URL) error {
-	cmd := exec.Command("helm", "repo", "add", name, u.String())
+func repoadd(name string, u *url.URL, verbose bool, logger LogPrinter) error {
+	fullcommand := []string{"repo", "add", name, u.String()}
+	if verbose {
+		fullcommand = append(fullcommand, "--debug")
+	}
+	cmd := exec.Command("helm", fullcommand...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("error adding a repo to the helm repository: %s", string(out))
+	}
+	if verbose {
+		logger.Print(Colorize(Cyan, "Command: "+cmd.String()))
+		logger.Print(string(out))
 	}
 	return nil
 }
@@ -206,7 +228,11 @@ func (b *Boondoggle) SelfFetch(path string, version string) error {
 	}
 	cmd := exec.Command("helm", strings.Split(fetchcommand, " ")...)
 	out, err := cmd.CombinedOutput()
-	fmt.Println("Fetching the umbrella...")
+	b.L.Print("Fetching the umbrella...")
+	if b.Verbose {
+		b.L.Print(Colorize(Cyan, "Command: "+cmd.String()))
+		b.L.Print(string(out))
+	}
 	if err != nil {
 		return fmt.Errorf("error with self fetch: %s", string(out))
 	}
@@ -214,8 +240,5 @@ func (b *Boondoggle) SelfFetch(path string, version string) error {
 }
 
 func (b Boondoggle) is2() bool {
-	if b.HelmVersion == 2 {
-		return true
-	}
-	return false
+	return b.HelmVersion == 2
 }

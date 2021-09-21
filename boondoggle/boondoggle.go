@@ -71,6 +71,10 @@ type RawBoondoggle struct {
 	} `mapstructure:"services"`
 }
 
+type LogPrinter interface {
+	Print(...interface{})
+}
+
 // Boondoggle is the processed version of RawBoondoggle. It represents the settings of only the chosen options.
 type Boondoggle struct {
 	PullSecretsName string
@@ -82,6 +86,9 @@ type Boondoggle struct {
 	Umbrella        Umbrella
 	Services        []Service
 	ExtraEnv        map[string]string
+	L               LogPrinter
+	Verbose         bool
+	SuperSecret     bool
 }
 
 // HelmRepo is the data needed to add a Helm Repository. Part of Boondoggle struct.
@@ -132,9 +139,15 @@ type Service struct {
 }
 
 // NewBoondoggle unmarshals the boondoggle.yml to RawBoondoggle and returns a processed Boondoggle struct type.
-func NewBoondoggle(config RawBoondoggle, environment string, setStateAll string, serviceState []string, extraEnv map[string]string) Boondoggle {
+func NewBoondoggle(config RawBoondoggle, environment string, setStateAll string, serviceState []string, extraEnv map[string]string, logger LogPrinter, verbose bool, superSecret bool) Boondoggle {
 	var boondoggle Boondoggle
 	boondoggle.ExtraEnv = extraEnv
+	boondoggle.L = logger
+	boondoggle.Verbose = verbose
+	boondoggle.SuperSecret = superSecret
+	if superSecret {
+		boondoggle.Verbose = true
+	}
 	boondoggle.configureServices(config, setStateAll, serviceState)
 	boondoggle.configureUmbrella(config, environment)
 	boondoggle.configureTopLevel(config)
@@ -185,7 +198,7 @@ func (b *Boondoggle) configureUmbrella(r RawBoondoggle, environment string) {
 
 	if err != nil {
 		// indicates there was not a match for the given environment
-		fmt.Print(err)
+		b.L.Print(err)
 	} else {
 		// build the environment in Boondoggle
 		b.Umbrella.Name = r.Umbrella.Name
@@ -203,7 +216,7 @@ func getRawUmbrellaEnvkeyByName(desiredEnvName string, r RawBoondoggle) (int, er
 			return key, nil
 		}
 	}
-	return 999, fmt.Errorf("The specified environment was not found")
+	return 999, fmt.Errorf("the specified environment was not found")
 }
 
 // Converts a RawBoondoggle into the services for Boondoggle so they can be consumed by the rest of the application.
@@ -231,7 +244,7 @@ func (b *Boondoggle) configureServices(r RawBoondoggle, setStateAll string, serv
 
 		if err != nil {
 			// indicates there was not a match for the given service and state-name
-			fmt.Print(err)
+			b.L.Print(err)
 		} else {
 			// build the service from the selected state
 			var completeService = Service{
@@ -256,7 +269,7 @@ func (b *Boondoggle) configureServices(r RawBoondoggle, setStateAll string, serv
 			if len(completeService.Tags) < 1 {
 				completeService.Tags = rawService.DepValuesAllStates.Tags
 			}
-			if completeService.Enabled == false {
+			if !completeService.Enabled {
 				completeService.Enabled = rawService.DepValuesAllStates.Enabled
 			}
 			if completeService.Importvalues == nil {
@@ -303,8 +316,7 @@ func getServiceStatesMap(serviceState []string) map[string]string {
 	var serviceStatesMap = make(map[string]string)
 	for _, value := range serviceState {
 		// --service-state flag is formatted "name=value", split on the "=" and return a map of the values.
-		splitServiceState := make([]string, 2)
-		splitServiceState = strings.Split(value, "=")
+		splitServiceState := strings.Split(value, "=")
 		serviceStatesMap[splitServiceState[0]] = splitServiceState[1]
 	}
 	return serviceStatesMap
@@ -325,7 +337,7 @@ func getRawStateKeyByName(desiredServiceName string, desiredServiceState string,
 			}
 		}
 	}
-	return 999, fmt.Errorf("A service or state requested was not found for %s %s", desiredServiceName, desiredServiceState)
+	return 999, fmt.Errorf("a service or state requested was not found for %s %s", desiredServiceName, desiredServiceState)
 }
 
 //replace env vars in a string slice.

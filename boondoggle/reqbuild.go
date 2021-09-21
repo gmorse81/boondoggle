@@ -146,7 +146,6 @@ func getVersionFlag(service Service, svo []string) string {
 }
 
 func getLocalRepoLocation(s Service, l string) string {
-	var repo string
-	repo = fmt.Sprintf("file://%s/%s/%s", l, s.Name, s.Chart)
+	repo := fmt.Sprintf("file://%s/%s/%s", l, s.Name, s.Chart)
 	return repo
 }
