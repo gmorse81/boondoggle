@@ -145,6 +145,8 @@ services:
 
 ## How do you use it?
 
+`boondoggle --version` will now output the version number.
+
 After creating your boondoggle.yml and placing it into the git repo which contains your helm umbrella, run the `boondoggle up` command with any flags you need to specify environemt and state.
 
 here's the output from boondoggle up --help

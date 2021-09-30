@@ -8,8 +8,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
-var gitTag string
+var (
+	cfgFile string
+	gitTag  string
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -40,7 +42,7 @@ func Execute() {
 
 func init() {
 	rootCmd.SetVersionTemplate(`{{printf "%s" .Version}}
-`) //for new line, \n didn't work.
+`) // For new line, \n didn't work.
 
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (./boondoggle.yml)")
