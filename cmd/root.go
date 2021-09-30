@@ -9,11 +9,13 @@ import (
 )
 
 var cfgFile string
+var gitTag string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "boondoggle",
-	Short: "Boondoggle is a helm umbrella chart preprocessor, a dependency state management tool as well as a local development tool.",
+	Use:     "boondoggle",
+	Short:   "Boondoggle is a helm umbrella chart preprocessor, a dependency state management tool as well as a local development tool.",
+	Version: gitTag,
 }
 
 var (
@@ -37,6 +39,9 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.SetVersionTemplate(`{{printf "%s" .Version}}
+`) //for new line, \n didn't work.
+
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (./boondoggle.yml)")
 
