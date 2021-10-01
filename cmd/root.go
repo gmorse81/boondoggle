@@ -8,12 +8,16 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
+var (
+	cfgFile string
+	gitTag  string
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "boondoggle",
-	Short: "Boondoggle is a helm umbrella chart preprocessor, a dependency state management tool as well as a local development tool.",
+	Use:     "boondoggle",
+	Short:   "Boondoggle is a helm umbrella chart preprocessor, a dependency state management tool as well as a local development tool.",
+	Version: gitTag,
 }
 
 var (
@@ -29,7 +33,7 @@ var (
 )
 
 // Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
+// This is called by main.main().  It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
@@ -37,6 +41,9 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.SetVersionTemplate(`{{printf "%s" .Version}}
+`) // For new line, \n didn't work.
+
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (./boondoggle.yml)")
 

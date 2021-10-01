@@ -51,21 +51,20 @@ steps:
       event: [ pull_request ]
       status: [ success ]
 
-  - name: Docker Build DryRun
-    image: plugins/docker
-    environment:
-      DOCKER_USERNAME:
-        from_secret: docker_username
-      DOCKER_PASSWORD:
-        from_secret: docker_password
-    settings:
-      repo: gmorse81/boondoggle
-      tags:
-        - dev
-      dry_run: true
-    when:
-      event: [ pull_request ]
-      status: [ success ]
+  #- name: Docker Build DryRun
+  #  image: plugins/docker
+  #  environment:
+  #    DOCKER_USERNAME:
+  #      from_secret: docker_username
+  #    DOCKER_PASSWORD:
+  #      from_secret: docker_password
+  #  settings:
+  #    repo: gmorse81/boondoggle
+  #    tags:
+  #      - dev
+  #  when:
+  #    event: [ pull_request ]
+  #    status: [ success ]
 
   # - name: docker_build_latest
   #   image: plugins/docker
