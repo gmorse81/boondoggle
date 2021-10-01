@@ -62,7 +62,6 @@ steps:
       repo: gmorse81/boondoggle
       tags:
         - dev
-      dry_run: true
     when:
       event: [ pull_request ]
       status: [ success ]
