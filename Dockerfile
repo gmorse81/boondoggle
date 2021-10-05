@@ -12,10 +12,11 @@ WORKDIR /
 RUN curl -L "https://get.helm.sh/${FILENAME}" | tar zxv -C /tmp
 
 FROM golang:1.14 as gobuild
+ARG DRONE_TAG
 WORKDIR /boondogglefiles
 COPY --from=helmbuild /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -mod=vendor -o /boondoggle
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -mod=vendor -o /boondoggle -ldflags="-X github.com/gmorse81/boondoggle/v3/cmd.gitTag=${DRONE_TAG}"
 
 # The image we keep
 FROM google/cloud-sdk:alpine
