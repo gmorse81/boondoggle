@@ -9,7 +9,8 @@ builds:
       - CGO_ENABLED=0
     flags:
       - -mod=vendor
-      - -ldflags="-X github.com/gmorse81/boondoggle/v3/cmd.gitTag={{ .Tag }}"
+    ldflags:
+      - -s -w -X github.com/gmorse81/boondoggle/v3/cmd.gitTag={{.Tag}}
 
 brews:
   -
