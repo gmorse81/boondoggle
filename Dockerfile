@@ -12,7 +12,6 @@ WORKDIR /
 RUN curl -L "https://get.helm.sh/${FILENAME}" | tar zxv -C /tmp
 
 FROM golang:1.14 as gobuild
-ARG DRONE_TAG
 WORKDIR /boondogglefiles
 COPY --from=helmbuild /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY . .
