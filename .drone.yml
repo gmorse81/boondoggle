@@ -9,14 +9,14 @@ steps:
       - git fetch --tags
 
   - name: unit_test
-    image: golang:1.14
+    image: golang:1.17
     commands:
       - go test -mod=vendor -v ./...
     when:
       event: [ pull_request, tag ]
 
   - name: Goreleaser Build
-    image: golang:1.14
+    image: golang:1.17
     environment:
       GITHUB_TOKEN:
         from_secret: github_token
@@ -41,7 +41,7 @@ steps:
       status: [ success ]
 
   - name: Goreleaser Build DryRun
-    image: golang:1.14
+    image: golang:1.17
     environment:
       GITHUB_TOKEN:
         from_secret: github_token
