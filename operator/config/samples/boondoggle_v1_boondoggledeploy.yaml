@@ -1,0 +1,6 @@
+apiVersion: boondoggle.morsecode.name/v1
+kind: BoondoggleDeploy
+metadata:
+  name: boondoggledeploy-sample
+spec:
+  # TODO(user): Add fields here

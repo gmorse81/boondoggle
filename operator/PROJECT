@@ -1,0 +1,16 @@
+domain: morsecode.name
+layout:
+- go.kubebuilder.io/v3
+projectName: boondoggle-crd
+repo: github.com/gmorse81/boondoggle-crd
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: morsecode.name
+  group: boondoggle
+  kind: BoondoggleDeploy
+  path: github.com/gmorse81/boondoggle-crd/api/v1
+  version: v1
+version: "3"
