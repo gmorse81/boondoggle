@@ -104,10 +104,10 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, us
 	// Run the command
 	if !dryRun {
 		b.L.Print("Installing the environment...")
-		out, err := cmd.CombinedOutput()
 		if b.Verbose {
-			b.L.Print(Colorize(Cyan, "Command: "+cmd.String()))
+			b.L.Print(Format(Cyan, "Command: "+cmd.String()))
 		}
+		out, err := cmd.CombinedOutput()
 		return out, err
 	}
 
@@ -119,12 +119,14 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, us
 func (b *Boondoggle) DepUp() error {
 	b.L.Print("Updating dependencies...")
 	cmd := exec.Command("helm", "dep", "up", b.Umbrella.Path)
+	if b.Verbose {
+		b.L.Print(Format(Cyan, "Command: "+cmd.String()))
+	}
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("there was an error updating the dependencies on the umbrella: %s", err)
 	}
 	if b.Verbose {
-		b.L.Print(Colorize(Cyan, "Command: "+cmd.String()))
 		b.L.Print(string(out))
 	}
 
@@ -140,9 +142,11 @@ It will not do anything if the repo is already added.
 */
 func (b *Boondoggle) AddHelmRepos() error {
 	cmd := exec.Command("helm", "repo", "list")
+	if b.Verbose {
+		b.L.Print(Format(Cyan, "Command: "+cmd.String()))
+	}
 	out, _ := cmd.CombinedOutput()
 	if b.Verbose {
-		b.L.Print(Colorize(Cyan, "Command: "+cmd.String()))
 		b.L.Print(string(out))
 	}
 	b.L.Print("Adding helm repos...")
@@ -206,12 +210,14 @@ func repoadd(name string, u *url.URL, verbose bool, logger LogPrinter) error {
 		fullcommand = append(fullcommand, "--debug")
 	}
 	cmd := exec.Command("helm", fullcommand...)
+	if verbose {
+		logger.Print(Format(Cyan, "Command: "+cmd.String()))
+	}
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("error adding a repo to the helm repository: %s", string(out))
 	}
 	if verbose {
-		logger.Print(Colorize(Cyan, "Command: "+cmd.String()))
 		logger.Print(string(out))
 	}
 	return nil
@@ -227,10 +233,12 @@ func (b *Boondoggle) SelfFetch(path string, version string) error {
 		fetchcommand = fmt.Sprintf("fetch %s/%s --untar --version=%s -d %s", cleanRepo, b.Umbrella.Name, version, path)
 	}
 	cmd := exec.Command("helm", strings.Split(fetchcommand, " ")...)
+	if b.Verbose {
+		b.L.Print(Format(Cyan, "Command: "+cmd.String()))
+	}
 	out, err := cmd.CombinedOutput()
 	b.L.Print("Fetching the umbrella...")
 	if b.Verbose {
-		b.L.Print(Colorize(Cyan, "Command: "+cmd.String()))
 		b.L.Print(string(out))
 	}
 	if err != nil {
