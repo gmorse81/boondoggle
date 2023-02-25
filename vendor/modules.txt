@@ -49,7 +49,7 @@ github.com/subosito/gotenv
 # golang.org/x/crypto v0.0.0-20201002170205-7f63de1d35b0
 ## explicit
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/sys v0.0.0-20201007165808-a893ed343c85
+# golang.org/x/sys v0.1.0
 ## explicit
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
