@@ -115,7 +115,7 @@ func (b *Boondoggle) DoUpgrade(namespace string, release string, dryRun bool, us
 
 }
 
-//DepUp runs "helm dependency update".
+// DepUp runs "helm dependency update".
 func (b *Boondoggle) DepUp() error {
 	b.L.Print("Updating dependencies...")
 	cmd := exec.Command("helm", "dep", "up", b.Umbrella.Path)
@@ -123,11 +123,11 @@ func (b *Boondoggle) DepUp() error {
 		b.L.Print(Format(Cyan, "Command: "+cmd.String()))
 	}
 	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("there was an error updating the dependencies on the umbrella: %s", err)
-	}
 	if b.Verbose {
 		b.L.Print(string(out))
+	}
+	if err != nil {
+		return fmt.Errorf("there was an error updating the dependencies on the umbrella: %s", err)
 	}
 
 	return nil
